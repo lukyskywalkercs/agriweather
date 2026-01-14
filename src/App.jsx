@@ -767,8 +767,8 @@ function App() {
                 {showMap ? 'Ocultar mapa' : 'Ver mapa del huerto'}
               </button>
             </div>
-            {showMap ? (
-              <>
+            <>
+              {showMap && (
                 <div className="map-wrapper">
                   <MapContainer center={[coords.lat, coords.lon]} zoom={11} scrollWheelZoom style={{ height: '100%', width: '100%' }}>
                     <MapController center={[coords.lat, coords.lon]} />
@@ -781,17 +781,7 @@ function App() {
                     </Marker>
                   </MapContainer>
                 </div>
-                <div className="map-name">
-                  <MapPin size={16} />
-                  <input
-                    type="text"
-                    value={orchardName}
-                    onChange={e => setOrchardName(e.target.value)}
-                    placeholder="Nombre visible del huerto"
-                  />
-                </div>
-              </>
-            ) : (
+              )}
               <div className="map-compact">
                 <div>
                   <p className="metric-label">Huerto</p>
@@ -806,7 +796,16 @@ function App() {
                   <p className="metric-value">{provinceName}</p>
                 </div>
               </div>
-            )}
+              <div className="map-name">
+                <MapPin size={16} />
+                <input
+                  type="text"
+                  value={orchardName}
+                  onChange={e => setOrchardName(e.target.value)}
+                  placeholder="Nombre visible del huerto"
+                />
+              </div>
+            </>
           </div>
         </div>
 
