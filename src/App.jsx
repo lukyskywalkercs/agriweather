@@ -132,6 +132,11 @@ function App() {
   const [userName, setUserName] = useState('')
   const [trialStart, setTrialStart] = useState(null)
   const [feedbackSeen, setFeedbackSeen] = useState(false)
+  const [showDetails, setShowDetails] = useState(false)
+  const [showCalc, setShowCalc] = useState(false)
+  const [showHistory, setShowHistory] = useState(false)
+  const [showMap, setShowMap] = useState(false)
+  const [showMetrics, setShowMetrics] = useState(false)
   const [editOrchardId, setEditOrchardId] = useState(null)
   const [editOrchardName, setEditOrchardName] = useState('')
   const [editOrchardCoords, setEditOrchardCoords] = useState('')
@@ -273,6 +278,7 @@ function App() {
       return hours > 24 && hours <= 48
     }) || null
   }, [decision])
+  const validityUntil = forecast?.hourly?.time?.[47] || null
 
   const handleSaveOrchard = () => {
     if (trialExpired) return
@@ -612,7 +618,11 @@ function App() {
               {statusIcon}
             </div>
             <h2>{decision ? decision.verdict : 'Introduce coordenadas'}</h2>
+            <p className="seal">{decision ? `${decision.verdict === 'RECOLECTAR' ? 'Se recomienda recolectar hoy' : 'No se recomienda recolectar hoy'}` : ''}</p>
             <p className="status-reason">{decision ? decision.reason : 'Esperando ubicación válida.'}</p>
+            {validityUntil && (
+              <p className="status-validity">Válido hasta: {new Date(validityUntil).toLocaleString()}</p>
+            )}
             <div className="summary">
               <p className="summary-title">Resumen rápido</p>
               <p className="summary-description">
@@ -652,39 +662,56 @@ function App() {
                   )}
                 </div>
               </div>
+              {(firstWindow24 || firstWindow48) && (
+                <div className="biz-callout">
+                  {firstWindow24
+                    ? `Existe una ventana segura: ${new Date(firstWindow24.start).toLocaleDateString()} · ${new Date(firstWindow24.start).toLocaleTimeString()} → ${new Date(firstWindow24.end).toLocaleTimeString()}`
+                    : firstWindow48
+                    ? `Existe una ventana segura en 24–48h: ${new Date(firstWindow48.start).toLocaleDateString()} · ${new Date(firstWindow48.start).toLocaleTimeString()} → ${new Date(firstWindow48.end).toLocaleTimeString()}`
+                    : 'Sin ventana segura en las próximas 48h.'}
+                </div>
+              )}
             </div>
             <ul className="status-meta">
               <li>Ventana de secado buscada: ≥ 6 h sin lluvia</li>
               <li>Fuente: Open-Meteo (48 h, horario local)</li>
             </ul>
+            <div className="cta-inline">¿Quieres adaptar este criterio a tu operativa?</div>
           </div>
 
           <div className="map-card">
             <div className="map-header">
               <p>Ubicación del huerto</p>
               <span>{coords.lat.toFixed(4)}, {coords.lon.toFixed(4)}</span>
+              <button className="toggle-btn" type="button" onClick={() => setShowMap(!showMap)}>
+                {showMap ? 'Ocultar mapa' : 'Ver mapa del huerto'}
+              </button>
             </div>
-            <div className="map-wrapper">
-              <MapContainer center={[coords.lat, coords.lon]} zoom={11} scrollWheelZoom style={{ height: '100%', width: '100%' }}>
-                <MapController center={[coords.lat, coords.lon]} />
-                <TileLayer
-                  attribution='&copy; OpenStreetMap contributors'
-                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                />
-                <Marker position={[coords.lat, coords.lon]} icon={markerIcon}>
-                  <Popup>Huerto cítrico</Popup>
-                </Marker>
-              </MapContainer>
-            </div>
-            <div className="map-name">
-              <MapPin size={16} />
-              <input
-                type="text"
-                value={orchardName}
-                onChange={e => setOrchardName(e.target.value)}
-                placeholder="Nombre visible del huerto"
-              />
-            </div>
+            {showMap && (
+              <>
+                <div className="map-wrapper">
+                  <MapContainer center={[coords.lat, coords.lon]} zoom={11} scrollWheelZoom style={{ height: '100%', width: '100%' }}>
+                    <MapController center={[coords.lat, coords.lon]} />
+                    <TileLayer
+                      attribution='&copy; OpenStreetMap contributors'
+                      url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    />
+                    <Marker position={[coords.lat, coords.lon]} icon={markerIcon}>
+                      <Popup>Huerto cítrico</Popup>
+                    </Marker>
+                  </MapContainer>
+                </div>
+                <div className="map-name">
+                  <MapPin size={16} />
+                  <input
+                    type="text"
+                    value={orchardName}
+                    onChange={e => setOrchardName(e.target.value)}
+                    placeholder="Nombre visible del huerto"
+                  />
+                </div>
+              </>
+            )}
           </div>
         </div>
 

@@ -91,7 +91,7 @@
   padding: 0 24px 48px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
 }
 
 .top-row {
@@ -202,10 +202,10 @@
 
 .status-label {
   text-transform: uppercase;
-  font-size: 14px;
-  font-weight: 700;
-  color: #1f2937;
-  letter-spacing: 0.04em;
+  font-size: 16px;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: 0.05em;
 }
 
 .title-lg {
@@ -395,6 +395,7 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+  margin: 0;
 }
 
 .info-list {
