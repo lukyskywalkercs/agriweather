@@ -595,6 +595,16 @@ function App() {
           </div>
         </div>
 
+        <div className="info-card">
+          <p className="status-label title-lg">Info ventana de secado</p>
+          <ul className="info-list">
+            <li>Se calcula con la previsión real de las próximas 48 h (Open-Meteo).</li>
+            <li>Tramos de 6 h con lluvia ≤ 0.1 mm/h y humedad &lt; 85%, deslizándose hora a hora (puede haber solapes si sigue seco).</li>
+            <li>Mostramos la 1ª ventana que empieza en &lt;24 h y la 1ª que empieza entre 24–48 h.</li>
+            <li>Si no hay ventana: suele ser por lluvia prevista (pico {forecast ? `${forecast.summary.maxPrecip.toFixed(1)} mm` : '—'}) o humedad media {forecast ? `${forecast.summary.avgHumidity.toFixed(0)}%` : '—'}.</li>
+          </ul>
+        </div>
+
         <div className="status-grid">
           <div className={cardClass}>
             <div className="status-head">
