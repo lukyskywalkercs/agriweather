@@ -305,6 +305,13 @@
   border-top: 1px solid #e2e8f0;
 }
 
+.map-compact {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  padding: 14px 16px;
+}
+
 .map-name input {
   flex: 1;
   border: none;
@@ -437,6 +444,33 @@
   padding-left: 18px;
   color: #334155;
   line-height: 1.5;
+}
+
+.context-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  border-top: 1px solid #e2e8f0;
+  padding-top: 8px;
+}
+
+.context-row:first-of-type {
+  border-top: none;
+  padding-top: 0;
+}
+
+.context-label {
+  color: #64748b;
+  font-weight: 600;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.context-value {
+  color: #0f172a;
+  font-weight: 700;
 }
 
 .ghost-btn {

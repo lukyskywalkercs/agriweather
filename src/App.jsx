@@ -141,6 +141,8 @@ function App() {
   const [editOrchardId, setEditOrchardId] = useState(null)
   const [editOrchardName, setEditOrchardName] = useState('')
   const [editOrchardCoords, setEditOrchardCoords] = useState('')
+  const [lastQueryAt, setLastQueryAt] = useState(null)
+  const [provinceName, setProvinceName] = useState('—')
 
   useEffect(() => {
     if (!userId || feedbackSeen) return
@@ -157,6 +159,17 @@ function App() {
     const b = orchards.find(o => o.id === compareB)
     return { a, b }
   }, [compareA, compareB, orchards])
+  const stability = useMemo(() => {
+    if (!forecast) return '—'
+    const isStable = forecast.summary.maxPrecip <= 0.2 && forecast.summary.avgHumidity < 70
+    return isStable ? 'Alta' : 'Media'
+  }, [forecast])
+  const contextTime = useMemo(() => {
+    if (selectedOrchard?.lastDecision?.timestamp) {
+      return new Date(selectedOrchard.lastDecision.timestamp).toLocaleString()
+    }
+    return lastQueryAt || '—'
+  }, [lastQueryAt, selectedOrchard])
 
   useEffect(() => {
     setRegisterOpen(true)
@@ -186,17 +199,36 @@ function App() {
         })
         const evalResult = evaluateDecision(data.hourly, windows)
         setDecision(evalResult)
+        setLastQueryAt(new Date().toLocaleString())
         await updateOrchardRecord(evalResult)
         setMetrics(prev => ({ ...prev, queries: prev.queries + 1 }))
       } catch (err) {
         setError(err.message || 'Error desconocido')
         setForecast(null)
         setDecision(null)
+        setLastQueryAt(null)
       } finally {
         setLoading(false)
       }
     }
     fetchForecast()
+  }, [coords])
+
+  useEffect(() => {
+    if (!coords?.lat || !coords?.lon) return
+    const fetchProvince = async () => {
+      try {
+        const url = `https://geocoding-api.open-meteo.com/v1/reverse?latitude=${coords.lat}&longitude=${coords.lon}&language=es&count=1`
+        const res = await fetch(url)
+        if (!res.ok) throw new Error('No se pudo obtener la provincia')
+        const data = await res.json()
+        const name = data?.results?.[0]?.admin1 || '—'
+        setProvinceName(name)
+      } catch (err) {
+        setProvinceName('—')
+      }
+    }
+    fetchProvince()
   }, [coords])
 
   const updateOrchardRecord = async evalResult => {
@@ -409,6 +441,8 @@ function App() {
       setSelectedId(null)
       setDecision(null)
       setForecast(null)
+      setLastQueryAt(null)
+      setProvinceName('—')
       setCoords(DEFAULT_COORDS)
       setInput(`${DEFAULT_COORDS.lat}, ${DEFAULT_COORDS.lon}`)
       
@@ -461,6 +495,8 @@ function App() {
     setInput('')
     setDecision(null)
     setForecast(null)
+    setLastQueryAt(null)
+    setProvinceName('—')
     setRegisterOpen(true)
     setEditOrchardId(null)
     setEditOrchardName('')
@@ -629,6 +665,22 @@ function App() {
         </div>
 
         <div className="info-card">
+          <p className="status-label title-lg">Contexto de la consulta</p>
+          <div className="context-row">
+            <span className="context-label">Fecha y hora</span>
+            <span className="context-value">{contextTime}</span>
+          </div>
+          <div className="context-row">
+            <span className="context-label">Validez</span>
+            <span className="context-value">{validityUntil}</span>
+          </div>
+          <div className="context-row">
+            <span className="context-label">Estabilidad meteorológica</span>
+            <span className="context-value">{stability}</span>
+          </div>
+        </div>
+
+        <div className="info-card">
           <p className="status-label title-lg">Info ventana de secado</p>
           <ul className="info-list">
             <li>Se calcula con la previsión real de las próximas 48 h (Open-Meteo).</li>
@@ -702,7 +754,7 @@ function App() {
               <li>Ventana de secado buscada: ≥ 6 h sin lluvia</li>
               <li>Fuente: Open-Meteo (48 h, horario local)</li>
             </ul>
-            <div className="cta-inline">¿Quieres adaptar este criterio a tu operativa?</div>
+            <div className="cta-inline">Este criterio puede adaptarse a la operativa concreta de cada almacén.</div>
           </div>
 
           <div className="map-card">
@@ -713,7 +765,7 @@ function App() {
                 {showMap ? 'Ocultar mapa' : 'Ver mapa del huerto'}
               </button>
             </div>
-            {showMap && (
+            {showMap ? (
               <>
                 <div className="map-wrapper">
                   <MapContainer center={[coords.lat, coords.lon]} zoom={11} scrollWheelZoom style={{ height: '100%', width: '100%' }}>
@@ -737,6 +789,21 @@ function App() {
                   />
                 </div>
               </>
+            ) : (
+              <div className="map-compact">
+                <div>
+                  <p className="metric-label">Huerto</p>
+                  <p className="metric-value">{orchardName || 'Huerto sin nombre'}</p>
+                </div>
+                <div>
+                  <p className="metric-label">Coordenadas</p>
+                  <p className="metric-value">{coords.lat.toFixed(4)}, {coords.lon.toFixed(4)}</p>
+                </div>
+                <div>
+                  <p className="metric-label">Provincia</p>
+                  <p className="metric-value">{provinceName}</p>
+                </div>
+              </div>
             )}
           </div>
         </div>
