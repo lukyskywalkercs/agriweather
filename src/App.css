@@ -206,6 +206,12 @@
   gap: 12px;
 }
 
+.status.primary {
+  padding: 32px;
+  border-width: 2px;
+  box-shadow: 0 14px 40px rgba(15, 23, 42, 0.14);
+}
+
 .status.neutral {
   background: #f8fafc;
 }
@@ -240,6 +246,11 @@
 .status h2 {
   font-size: 34px;
   margin: 0;
+}
+
+.status.primary h2 {
+  font-size: 44px;
+  letter-spacing: 0.02em;
 }
 
 .status-reason {
@@ -308,7 +319,7 @@
 }
 
 .map-wrapper {
-  height: 320px;
+  height: 220px;
 }
 
 .map-name {
@@ -453,6 +464,14 @@
   margin: 0;
 }
 
+.info-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
 .info-list {
   margin: 0;
   padding-left: 18px;
@@ -504,6 +523,17 @@
 }
 
 .dry-compact {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 16px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.trace-card {
   background: #ffffff;
   border: 1px solid #e2e8f0;
   border-radius: 14px;
