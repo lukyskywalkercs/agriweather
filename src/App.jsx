@@ -1,9 +1,9 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import './App.css'
 import 'leaflet/dist/leaflet.css'
-import { MapContainer, Marker, Popup, TileLayer } from 'react-leaflet'
+import { MapContainer, Marker, Popup, TileLayer, useMap } from 'react-leaflet'
 import { Icon } from 'leaflet'
-import { CheckCircle, AlertTriangle, Octagon, MapPin, Save, Clock, Printer, Scale } from 'lucide-react'
+import { CheckCircle, AlertTriangle, Octagon, MapPin, Save, Clock, Printer, Scale, LogOut, Trash2 } from 'lucide-react'
 
 const markerIcon = new Icon({
   iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
@@ -15,6 +15,14 @@ const markerIcon = new Icon({
 })
 
 const DEFAULT_COORDS = { lat: 39.4699, lon: -0.3763 } // Valencia
+
+function MapController({ center }) {
+  const map = useMap()
+  useEffect(() => {
+    map.setView(center, map.getZoom())
+  }, [center, map])
+  return null
+}
 
 function parseCoords(input) {
   const cleaned = input.replace(/\s+/g, '')
@@ -120,6 +128,7 @@ function App() {
   const [registerError, setRegisterError] = useState('')
   const [registerLoading, setRegisterLoading] = useState(false)
   const [userId, setUserId] = useState(null)
+  const [userName, setUserName] = useState('')
   const [trialStart, setTrialStart] = useState(null)
   const [feedbackSeen, setFeedbackSeen] = useState(false)
 
@@ -291,6 +300,7 @@ function App() {
       if (!res.ok) throw new Error('No se pudo guardar tus datos.')
       const payload = await res.json()
       setUserId(payload.userId)
+      setUserName(payload.userName || registerName.trim())
       setTrialStart(payload.trialStart)
       setTrialDay(payload.trialDay)
       setFeedbackSeen(Boolean(payload.feedbackSeen))
@@ -320,11 +330,55 @@ function App() {
     setFeedbackOpen(false)
   }
 
+  const handleLogout = () => {
+    setUserId(null)
+    setUserName('')
+    setOrchards([])
+    setSelectedId(null)
+    setCoords(DEFAULT_COORDS)
+    setInput(`${DEFAULT_COORDS.lat}, ${DEFAULT_COORDS.lon}`)
+    setDecision(null)
+    setForecast(null)
+    setRegisterOpen(true)
+  }
+
+  const handleDeleteOrchard = async (orchardId, event) => {
+    event.stopPropagation()
+    if (!confirm('¿Eliminar este huerto?')) return
+    try {
+      const res = await fetch('/.netlify/functions/delete-orchard', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, orchardId }),
+      })
+      if (!res.ok) throw new Error('No se pudo eliminar')
+      const payload = await res.json()
+      setOrchards(payload.orchards || [])
+      if (selectedId === orchardId) {
+        setSelectedId(null)
+        setCoords(DEFAULT_COORDS)
+        setInput(`${DEFAULT_COORDS.lat}, ${DEFAULT_COORDS.lon}`)
+      }
+    } catch (err) {
+      alert('Error al eliminar: ' + err.message)
+    }
+  }
+
   return (
     <main className="app">
       <header className="hero">
         <div>
-          <p className="eyebrow">SaaS decisión cosecha cítricos · España 🍊</p>
+          <div className="hero-top">
+            <p className="eyebrow">SaaS decisión cosecha cítricos · España 🍊</p>
+            {userId && (
+              <div className="user-info">
+                <span className="user-name">{userName}</span>
+                <button className="logout-btn" onClick={handleLogout} title="Desconectar">
+                  <LogOut size={16} /> Desconectar
+                </button>
+              </div>
+            )}
+          </div>
           <h1>¿Recolectar en las próximas 48h?</h1>
           <p className="lede">
             Introduce las coordenadas del huerto y te mostramos una recomendación clara basada en previsión
@@ -347,13 +401,14 @@ function App() {
                 type="text"
                 value={input}
                 onChange={e => setInput(e.target.value)}
-                placeholder="39.4699, -0.3763"
+                placeholder="Pega aquí desde Google Maps (ej. 39.4699, -0.3763)"
                 autoComplete="off"
               />
               <button type="submit" disabled={loading}>
                 {loading ? 'Actualizando...' : 'Consultar'}
               </button>
             </div>
+            <p className="coords-hint">Solo la primera vez por huerto; después usa 'Mis huertos'.</p>
             {error && <p className="error">{error}</p>}
           </form>
 
@@ -378,19 +433,30 @@ function App() {
             <div className="orchard-list">
               {orchards.length === 0 && <p className="muted">Aún no hay huertos guardados.</p>}
               {orchards.map(o => (
-                <button
+                <div
                   key={o.id}
                   className={`orchard-item ${selectedId === o.id ? 'active' : ''}`}
-                  onClick={() => handleSelectOrchard(o)}
                 >
-                  <div>
-                    <p className="orchard-title">{o.name}</p>
-                    <p className="orchard-meta">{o.lat.toFixed(4)}, {o.lon.toFixed(4)}</p>
-                  </div>
-                  <div className={`pill ${o.lastDecision?.level || 'neutral'}`}>
-                    {o.lastDecision?.verdict || '—'}
-                  </div>
-                </button>
+                  <button
+                    className="orchard-item-btn"
+                    onClick={() => handleSelectOrchard(o)}
+                  >
+                    <div>
+                      <p className="orchard-title">{o.name}</p>
+                      <p className="orchard-meta">{o.lat.toFixed(4)}, {o.lon.toFixed(4)}</p>
+                    </div>
+                    <div className={`pill ${o.lastDecision?.level || 'neutral'}`}>
+                      {o.lastDecision?.verdict || '—'}
+                    </div>
+                  </button>
+                  <button
+                    className="delete-orchard-btn"
+                    onClick={e => handleDeleteOrchard(o.id, e)}
+                    title="Eliminar huerto"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </div>
               ))}
             </div>
           </div>
@@ -406,7 +472,7 @@ function App() {
             <p className="status-reason">{decision ? decision.reason : 'Esperando ubicación válida.'}</p>
             <div className="summary">
               <p className="summary-title">Resumen rápido</p>
-              <p className="muted">
+              <p className="summary-description">
                 Decide en 5s: validez de la recomendación, riesgo principal y cuántas ventanas de secado hay (crítico para cortar fruta sin humedad).
               </p>
               <div className="summary-grid">
@@ -437,6 +503,7 @@ function App() {
             </div>
             <div className="map-wrapper">
               <MapContainer center={[coords.lat, coords.lon]} zoom={11} scrollWheelZoom style={{ height: '100%', width: '100%' }}>
+                <MapController center={[coords.lat, coords.lon]} />
                 <TileLayer
                   attribution='&copy; OpenStreetMap contributors'
                   url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"

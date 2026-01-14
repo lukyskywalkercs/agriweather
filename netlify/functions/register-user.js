@@ -101,6 +101,7 @@ exports.handler = async (event) => {
       headers,
       body: JSON.stringify({
         userId: user.id,
+        userName: user.name,
         trialStart: user.trial_start,
         trialDay,
         feedbackSeen: user.feedback_seen,
