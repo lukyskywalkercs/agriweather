@@ -132,6 +132,9 @@ function App() {
   const [userName, setUserName] = useState('')
   const [trialStart, setTrialStart] = useState(null)
   const [feedbackSeen, setFeedbackSeen] = useState(false)
+  const [editOrchardId, setEditOrchardId] = useState(null)
+  const [editOrchardName, setEditOrchardName] = useState('')
+  const [editOrchardCoords, setEditOrchardCoords] = useState('')
 
   useEffect(() => {
     if (!userId || feedbackSeen) return
@@ -273,13 +276,62 @@ function App() {
     setOrchardName(orchard.name)
     setInput(`${orchard.lat}, ${orchard.lon}`)
     setCoords({ lat: orchard.lat, lon: orchard.lon })
+    setEditOrchardId(null)
+    setEditOrchardName('')
+    setEditOrchardCoords('')
   }
 
   const handleEditOrchard = orchard => {
-    setSelectedId(orchard.id)
-    setOrchardName(orchard.name)
-    setInput(`${orchard.lat}, ${orchard.lon}`)
-    setCoords({ lat: orchard.lat, lon: orchard.lon })
+    setEditOrchardId(orchard.id)
+    setEditOrchardName(orchard.name)
+    setEditOrchardCoords(`${orchard.lat}, ${orchard.lon}`)
+  }
+
+  const handleSaveEdit = async orchard => {
+    try {
+      const parsed = parseCoords(editOrchardCoords || '')
+      const decision = orchard.lastDecision || {
+        verdict: 'ESPERAR / VENTANA DE SECADO',
+        level: 'amber',
+        timestamp: new Date().toISOString(),
+      }
+      const body = {
+        userId,
+        orchard: {
+          id: orchard.id,
+          name: editOrchardName || 'Huerto sin nombre',
+          lat: parsed.lat,
+          lon: parsed.lon,
+        },
+        decision,
+      }
+      const res = await fetch('/.netlify/functions/save-orchard', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      })
+      if (!res.ok) {
+        const message = await res.text()
+        throw new Error(message || 'No se pudo guardar el huerto')
+      }
+      const payload = await res.json()
+      setOrchards(payload.orchards || [])
+      setSelectedId(orchard.id)
+      setOrchardName(editOrchardName || 'Huerto sin nombre')
+      setCoords({ lat: parsed.lat, lon: parsed.lon })
+      setInput(`${parsed.lat}, ${parsed.lon}`)
+      setEditOrchardId(null)
+      setEditOrchardName('')
+      setEditOrchardCoords('')
+    } catch (err) {
+      setError(err.message || 'Error al editar huerto')
+    }
+  }
+
+  const handleCancelEdit = () => {
+    setEditOrchardId(null)
+    setEditOrchardName('')
+    setEditOrchardCoords('')
   }
 
   const handlePrint = () => {
@@ -330,9 +382,11 @@ function App() {
       if (payload.orchards?.length) {
         setSelectedId(payload.orchards[0].id)
         setCoords({ lat: payload.orchards[0].lat, lon: payload.orchards[0].lon })
+        setInput(`${payload.orchards[0].lat}, ${payload.orchards[0].lon}`)
       } else {
         setSelectedId(null)
         setCoords(DEFAULT_COORDS)
+        setInput('')
       }
       setRegisterOpen(false)
     } catch (err) {
@@ -362,6 +416,9 @@ function App() {
     setDecision(null)
     setForecast(null)
     setRegisterOpen(true)
+    setEditOrchardId(null)
+    setEditOrchardName('')
+    setEditOrchardCoords('')
   }
 
   const handleDeleteOrchard = async (orchardId, event) => {
@@ -437,7 +494,7 @@ function App() {
           <div className="orchard-card">
             <div className="orchard-header">
               <p className="status-label">Mis huertos</p>
-              <span className="orchard-count">{orchards.length}/30</span>
+              <span className="orchard-count">{orchards.length}/10</span>
             </div>
             <div className="orchard-name">
               <label htmlFor="orchard-name">Nombre del huerto</label>
@@ -488,6 +545,40 @@ function App() {
                 </div>
               ))}
             </div>
+
+            {editOrchardId && (
+              <div className="edit-panel">
+                <p className="status-label">Editar huerto</p>
+                <label>Nombre</label>
+                <input
+                  type="text"
+                  value={editOrchardName}
+                  onChange={e => setEditOrchardName(e.target.value)}
+                  placeholder="Nuevo nombre"
+                />
+                <label>Coordenadas (lat, lon)</label>
+                <input
+                  type="text"
+                  value={editOrchardCoords}
+                  onChange={e => setEditOrchardCoords(e.target.value)}
+                  placeholder="Pega aquí desde Google Maps"
+                />
+                <div className="edit-actions">
+                  <button
+                    className="save-btn"
+                    type="button"
+                    onClick={() => {
+                      const orchard = orchards.find(x => x.id === editOrchardId)
+                      if (orchard) handleSaveEdit(orchard)
+                    }}
+                    disabled={loading || trialExpired || !userId}
+                  >
+                    Guardar cambios
+                  </button>
+                  <button className="cancel-btn" type="button" onClick={handleCancelEdit}>Cancelar</button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
