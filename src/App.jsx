@@ -654,6 +654,9 @@ function App() {
                   {windowsCount} ventana(s) seca(s) detectadas en las próximas 48 h. Primera ventana: {new Date(firstWindow.start).toLocaleString()} → {new Date(firstWindow.end).toLocaleString()}, humedad media {firstWindow.avgHumidity.toFixed(0)}%, precip máx {firstWindow.maxPrecip.toFixed(1)} mm/h.
                 </p>
               )}
+              <p className="dry-note">
+                Las ventanas se cuentan con tramos de 6 h que se deslizan hora a hora; pueden aparecer varias ventanas solapadas si todo el tramo se mantiene seco.
+              </p>
               <h3>Cómo se calcula</h3>
             </div>
             <p className="chip">Criterio: 6 h seguidas con lluvia &lt;= 0.1 mm/h y humedad &lt; 85%</p>

@@ -360,6 +360,13 @@
   line-height: 1.5;
 }
 
+.dry-note {
+  margin: 0 0 6px;
+  color: #64748b;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
 .dry-empty {
   margin: 0;
   color: #475569;
