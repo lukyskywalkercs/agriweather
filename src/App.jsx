@@ -688,7 +688,7 @@ function App() {
                 </p>
               )}
               <p className="dry-note">
-                Las ventanas se cuentan con tramos de 6 h que se deslizan hora a hora; pueden aparecer varias ventanas solapadas si todo el tramo se mantiene seco.
+                Las ventanas se cuentan con tramos de 6 h que se desplazan hora a hora; pueden aparecer ventanas solapadas si todo sigue seco. “1ª ventana en 24h” = primer tramo que empieza dentro de las próximas 24h desde ahora (hora local). “1ª ventana en 48h” = primer tramo que empieza entre 24 y 48h; si no aparece, suele deberse a lluvia o humedad alta.
               </p>
               {!trialExpired && (
                 <div className="dry-highlight-row">
