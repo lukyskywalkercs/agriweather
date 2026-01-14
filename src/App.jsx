@@ -554,24 +554,42 @@ function App() {
 
       <section className="panel">
         <div className="top-row">
-          <form className="coords-form" onSubmit={handleSubmit}>
-            <label htmlFor="coords">Coordenadas (latitud, longitud)</label>
-            <div className="input-row">
-              <input
-                id="coords"
-                type="text"
-                value={input}
-                onChange={e => setInput(e.target.value)}
-                placeholder="Pega aquí desde Google Maps (ej. 39.4699, -0.3763)"
-                autoComplete="off"
-              />
-              <button type="submit" disabled={loading}>
-                {loading ? 'Actualizando...' : 'Consultar'}
-              </button>
+          <div className="left-stack">
+            <form className="coords-form" onSubmit={handleSubmit}>
+              <label htmlFor="coords">Coordenadas (latitud, longitud)</label>
+              <div className="input-row">
+                <input
+                  id="coords"
+                  type="text"
+                  value={input}
+                  onChange={e => setInput(e.target.value)}
+                  placeholder="Pega aquí desde Google Maps (ej. 39.4699, -0.3763)"
+                  autoComplete="off"
+                />
+                <button type="submit" disabled={loading}>
+                  {loading ? 'Actualizando...' : 'Consultar'}
+                </button>
+              </div>
+              <p className="coords-hint">Solo la primera vez por huerto. Guárdalo y después usa 'Mis huertos'.</p>
+              {error && <p className="error">{error}</p>}
+            </form>
+
+            <div className="info-card">
+              <p className="status-label title-lg">Contexto de la consulta</p>
+              <div className="context-row">
+                <span className="context-label">Fecha y hora</span>
+                <span className="context-value">{contextTime}</span>
+              </div>
+              <div className="context-row">
+                <span className="context-label">Validez</span>
+                <span className="context-value">{validityUntil}</span>
+              </div>
+              <div className="context-row">
+                <span className="context-label">Estabilidad meteorológica</span>
+                <span className="context-value">{stability}</span>
+              </div>
             </div>
-            <p className="coords-hint">Solo la primera vez por huerto. Guárdalo y después usa 'Mis huertos'.</p>
-            {error && <p className="error">{error}</p>}
-          </form>
+          </div>
 
           <div className="orchard-card">
             <div className="orchard-header">
@@ -661,22 +679,6 @@ function App() {
                 </div>
               </div>
             )}
-          </div>
-        </div>
-
-        <div className="info-card">
-          <p className="status-label title-lg">Contexto de la consulta</p>
-          <div className="context-row">
-            <span className="context-label">Fecha y hora</span>
-            <span className="context-value">{contextTime}</span>
-          </div>
-          <div className="context-row">
-            <span className="context-label">Validez</span>
-            <span className="context-value">{validityUntil}</span>
-          </div>
-          <div className="context-row">
-            <span className="context-label">Estabilidad meteorológica</span>
-            <span className="context-value">{stability}</span>
           </div>
         </div>
 

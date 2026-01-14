@@ -120,6 +120,12 @@
   align-items: start;
 }
 
+.left-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
 .coords-form {
   background: #ffffff;
   border: 1px solid #e2e8f0;
