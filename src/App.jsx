@@ -260,6 +260,14 @@ function App() {
 
   const windowsCount = decision?.windows?.length || 0
   const firstWindow = decision?.windows?.[0] || null
+  const firstWindow24 = useMemo(() => {
+    if (!decision?.windows?.length) return null
+    return decision.windows.find(w => (Date.parse(w.start) - Date.now()) / (1000 * 60 * 60) <= 24) || null
+  }, [decision])
+  const firstWindow48 = useMemo(() => {
+    if (!decision?.windows?.length) return null
+    return decision.windows.find(w => (Date.parse(w.start) - Date.now()) / (1000 * 60 * 60) <= 48) || null
+  }, [decision])
 
   const handleSaveOrchard = () => {
     if (trialExpired) return
@@ -608,6 +616,18 @@ function App() {
                   <p className="metric-label">Ventanas secas</p>
                   <p className="metric-value">{decision?.windows?.length || 0}</p>
                 </div>
+                <div>
+                  <p className="metric-label">Ventana &lt; 24h</p>
+                  <p className={`metric-value ${firstWindow24 ? 'highlight' : ''}`}>
+                    {firstWindow24 ? new Date(firstWindow24.start).toLocaleString() : '—'}
+                  </p>
+                </div>
+                <div>
+                  <p className="metric-label">Ventana &lt;= 48h</p>
+                  <p className={`metric-value ${firstWindow48 ? 'highlight' : ''}`}>
+                    {firstWindow48 ? new Date(firstWindow48.start).toLocaleString() : '—'}
+                  </p>
+                </div>
               </div>
             </div>
             <ul className="status-meta">
@@ -657,6 +677,18 @@ function App() {
               <p className="dry-note">
                 Las ventanas se cuentan con tramos de 6 h que se deslizan hora a hora; pueden aparecer varias ventanas solapadas si todo el tramo se mantiene seco.
               </p>
+              {!trialExpired && (
+                <div className="dry-highlight-row">
+                  <div className="dry-highlight">
+                    <p className="metric-label">Ventana &lt; 24h</p>
+                    <p className="metric-value highlight">{firstWindow24 ? `${new Date(firstWindow24.start).toLocaleString()} → ${new Date(firstWindow24.end).toLocaleString()}` : 'No detectada'}</p>
+                  </div>
+                  <div className="dry-highlight">
+                    <p className="metric-label">Ventana &lt;= 48h</p>
+                    <p className="metric-value highlight">{firstWindow48 ? `${new Date(firstWindow48.start).toLocaleString()} → ${new Date(firstWindow48.end).toLocaleString()}` : 'No detectada'}</p>
+                  </div>
+                </div>
+              )}
               <h3>Cómo se calcula</h3>
             </div>
             <p className="chip">Criterio: 6 h seguidas con lluvia &lt;= 0.1 mm/h y humedad &lt; 85%</p>

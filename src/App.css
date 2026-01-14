@@ -367,6 +367,20 @@
   line-height: 1.4;
 }
 
+.dry-highlight-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 8px;
+  margin: 6px 0;
+}
+
+.dry-highlight {
+  padding: 10px 12px;
+  border: 1px dashed #cbd5e1;
+  border-radius: 10px;
+  background: #f8fafc;
+}
+
 .dry-empty {
   margin: 0;
   color: #475569;
@@ -607,8 +621,13 @@
 
 .summary-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 8px;
+}
+
+.highlight {
+  color: #0ea5e9;
+  font-weight: 700;
 }
 
 .summary-row {
