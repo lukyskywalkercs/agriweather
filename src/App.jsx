@@ -85,6 +85,7 @@ function evaluateDecision(hourly, windows) {
       verdict: 'NO RECOLECTAR',
       level: 'red',
       reason: `Lluvia prevista (pico ${maxPrecip.toFixed(1)} mm) o humedad alta (${avgHumidity.toFixed(0)}%). Riesgo de fruta mojada.`,
+      windows,
     }
   }
 
@@ -295,6 +296,14 @@ function App() {
     }
     setRegisterLoading(true)
     try {
+      // LIMPIAR ESTADO ANTES DE CARGAR NUEVOS DATOS (CRÍTICO PARA SEGURIDAD)
+      setOrchards([])
+      setSelectedId(null)
+      setDecision(null)
+      setForecast(null)
+      setCoords(DEFAULT_COORDS)
+      setInput(`${DEFAULT_COORDS.lat}, ${DEFAULT_COORDS.lon}`)
+      
       const res = await fetch('/.netlify/functions/register-user', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -593,53 +602,62 @@ function App() {
           </div>
         </div>
 
-        <div className="history-premium">
-          <div className="history-card">
-            <div className="history-head">
-              <div className="history-title">
-                <p className="status-label">Histórico (últimas 3)</p>
-                <span className="history-orchard">{selectedOrchard?.name || 'Huerto no identificado'}</span>
-              </div>
-              <Clock size={16} />
+        <div className="history-card">
+          <div className="history-head">
+            <div className="history-title">
+              <p className="status-label">Histórico (últimas 3)</p>
+              <span className="history-orchard">{selectedOrchard?.name || 'Huerto no identificado'}</span>
             </div>
-            {!trialExpired && selectedOrchard?.history?.length ? (
-              <ul className="history-list">
-                {selectedOrchard.history.map((h, idx) => (
-                  <li key={idx}>
-                    <span className={`pill ${h.verdict.includes('NO') ? 'red' : h.verdict.includes('ESPERAR') ? 'amber' : 'green'}`}>
-                      {h.verdict}
-                    </span>
-                    <span>{new Date(h.timestamp).toLocaleString()}</span>
-                  </li>
-                ))}
-              </ul>
-            ) : trialExpired ? (
-              <p className="muted">Histórico desactivado tras la prueba. Contáctanos para más.</p>
-            ) : (
-              <p className="muted">Sin histórico aún.</p>
-            )}
+            <Clock size={16} />
           </div>
-
-          <div className="premium-card">
-            <p className="status-label">Próximamente</p>
-            <ul>
-              <li>Tracking GPS de camiones</li>
-              <li>Logística de recolección</li>
-              <li>Gestión de cuadrillas</li>
+          {!trialExpired && selectedOrchard?.history?.length ? (
+            <ul className="history-list">
+              {selectedOrchard.history.map((h, idx) => (
+                <li key={idx}>
+                  <span className={`pill ${h.verdict.includes('NO') ? 'red' : h.verdict.includes('ESPERAR') ? 'amber' : 'green'}`}>
+                    {h.verdict}
+                  </span>
+                  <span>{new Date(h.timestamp).toLocaleString()}</span>
+                </li>
+              ))}
             </ul>
-          </div>
+          ) : trialExpired ? (
+            <p className="muted">Histórico desactivado tras la prueba. Contáctanos para más.</p>
+          ) : (
+            <p className="muted">Sin histórico aún.</p>
+          )}
         </div>
 
         <div className="summary-row">
           <div className="weekly-card">
             <p className="status-label">Resumen semanal básico</p>
-            <p className="muted">
-              Usado como apoyo a la decisión en entornos reales de almacén.
-            </p>
-            {selectedOrchard?.history?.length ? (
-              <p className="summary-text">
-                Últimas decisiones: {selectedOrchard.history.map(h => h.verdict).join(' · ')}. Última consulta: {new Date(selectedOrchard.history[0].timestamp).toLocaleString()}. Riesgo principal actual: {primaryRisk}.
-              </p>
+            {selectedOrchard && decision ? (
+              <div className="weekly-content">
+                <div className="weekly-item">
+                  <span className="weekly-label">Huerto:</span>
+                  <span className="weekly-value">{selectedOrchard.name}</span>
+                </div>
+                <div className="weekly-item">
+                  <span className="weekly-label">Recomendación actual:</span>
+                  <span className={`weekly-value pill ${decision.level}`}>{decision.verdict}</span>
+                </div>
+                <div className="weekly-item">
+                  <span className="weekly-label">Riesgo principal:</span>
+                  <span className="weekly-value">{primaryRisk}</span>
+                </div>
+                {selectedOrchard.history?.length > 0 && (
+                  <>
+                    <div className="weekly-item">
+                      <span className="weekly-label">Última consulta:</span>
+                      <span className="weekly-value">{new Date(selectedOrchard.history[0].timestamp).toLocaleString()}</span>
+                    </div>
+                    <div className="weekly-item">
+                      <span className="weekly-label">Histórico reciente:</span>
+                      <span className="weekly-value">{selectedOrchard.history.slice(0, 3).map(h => h.verdict).join(' → ')}</span>
+                    </div>
+                  </>
+                )}
+              </div>
             ) : (
               <p className="muted">Consulta un huerto para generar su resumen.</p>
             )}

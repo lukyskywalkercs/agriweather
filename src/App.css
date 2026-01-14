@@ -296,6 +296,17 @@
   font-size: 20px;
 }
 
+.dry-summary {
+  margin: 0 0 8px;
+  padding: 10px 12px;
+  background: #f8fafc;
+  border-radius: 8px;
+  color: #0f172a;
+  font-size: 14px;
+  line-height: 1.5;
+  border-left: 3px solid #0ea5e9;
+}
+
 .chip {
   display: inline-block;
   align-self: flex-start;
@@ -560,10 +571,37 @@
   gap: 8px;
 }
 
-.summary-text {
-  margin: 0;
+.weekly-content {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.weekly-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.weekly-item:last-child {
+  border-bottom: none;
+}
+
+.weekly-label {
+  font-weight: 600;
+  color: #475569;
+  font-size: 13px;
+  min-width: 140px;
+}
+
+.weekly-value {
   color: #0f172a;
-  line-height: 1.4;
+  font-size: 14px;
+  text-align: right;
+  flex: 1;
 }
 
 .pdf-card button {
@@ -611,14 +649,7 @@
   padding: 10px 12px;
 }
 
-.history-premium {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 12px;
-  align-items: stretch;
-}
-
-.history-card, .premium-card {
+.history-card {
   background: #ffffff;
   border: 1px solid #e2e8f0;
   border-radius: 14px;
@@ -664,11 +695,6 @@
   padding: 10px 12px;
 }
 
-.premium-card ul {
-  margin: 8px 0 0;
-  padding-left: 18px;
-  color: #334155;
-}
 
 .muted {
   color: #64748b;
@@ -790,9 +816,6 @@
     grid-template-columns: 1fr;
   }
   .status-grid {
-    grid-template-columns: 1fr;
-  }
-  .history-premium {
     grid-template-columns: 1fr;
   }
   .summary-row {
