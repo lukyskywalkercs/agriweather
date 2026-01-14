@@ -958,7 +958,9 @@ function App() {
         </div>
 
         <footer className="footer">
-          <p className="note">SaaS desarrollado por LIND Informática.</p>
+          <p className="note">SaaS desarrollado por LIND Informática · Decisiones operativas basadas en datos reales.</p>
+          <p className="note">www.lindinformatica.com · Almassora (Castelló)</p>
+          <p className="note">Tots els drets reservats· 2026</p>
         </footer>
       </section>
 
