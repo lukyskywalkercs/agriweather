@@ -301,7 +301,11 @@ function App() {
     const dayLabel = sameDay ? 'hoy' : isTomorrow ? (morning ? 'mañana por la mañana' : 'mañana') : start.toLocaleDateString()
     return `Existe una ventana segura ${dayLabel} de ${start.toLocaleTimeString()} a ${end.toLocaleTimeString()}.`
   }, [nextWindow])
-  const validityUntil = forecast?.hourly?.time?.[47] || null
+  const validityUntil = useMemo(() => {
+    if (forecast?.hourly?.time?.[47]) return new Date(forecast.hourly.time[47]).toLocaleString()
+    const ts = Date.now() + 48 * 60 * 60 * 1000
+    return new Date(ts).toLocaleString()
+  }, [forecast])
 
   const handleSaveOrchard = () => {
     if (trialExpired) return
@@ -484,11 +488,6 @@ function App() {
       alert('Error al eliminar: ' + err.message)
     }
   }
-
-  const validityUntil = useMemo(() => {
-    const ts = Date.now() + 48 * 60 * 60 * 1000
-    return new Date(ts).toLocaleString()
-  }, [])
 
   return (
     <main className="app">
