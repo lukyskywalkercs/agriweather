@@ -835,14 +835,6 @@ function App() {
               <p className="muted">Consulta un huerto para generar su resumen.</p>
             )}
           </div>
-
-          <div className="pdf-card">
-            <p className="status-label">Informe PDF (básico)</p>
-            <p className="muted">Incluye marca de agua “Versión de prueba”.</p>
-            <button className="save-btn" type="button" onClick={handlePrint}>
-              <Printer size={18} /> Exportar informe
-            </button>
-          </div>
         </div>
 
         <div className="compare-card">
@@ -882,8 +874,7 @@ function App() {
         </div>
 
         <footer className="footer">
-          <p className="next">Próximamente: tracking GPS de camiones, logística y personal.</p>
-          <p className="note">Texto generado por IA. Objetivo: mostrar integración rápida para negocio.</p>
+          <p className="note">SaaS desarrollado por LIND Informática.</p>
         </footer>
       </section>
 
