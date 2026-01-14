@@ -748,6 +748,7 @@ function App() {
         </div>
 
         <div className="metrics">
+          <p className="metrics-note">Datos agregados de la previsión real (próximas 48 h, Open-Meteo).</p>
           <div>
             <p className="metric-label">Precipitación máx.</p>
             <p className="metric-value">

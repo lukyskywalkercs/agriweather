@@ -392,6 +392,13 @@
   gap: 12px;
 }
 
+.metrics-note {
+  grid-column: 1 / -1;
+  margin: 0;
+  font-size: 13px;
+  color: #475569;
+}
+
 .metrics > div {
   background: #ffffff;
   border: 1px solid #e2e8f0;
