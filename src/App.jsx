@@ -595,16 +595,6 @@ function App() {
           </div>
         </div>
 
-        <div className="info-card">
-          <p className="status-label">Info ventana de secado</p>
-          <ul className="info-list">
-            <li>Se calcula con la previsión real de las próximas 48 h (Open-Meteo).</li>
-            <li>Busca tramos de 6 h con lluvia ≤ 0.1 mm/h y humedad &lt; 85%, deslizándose hora a hora (puede haber solapes si sigue seco).</li>
-            <li>Destacamos la 1ª ventana que empieza en &lt;24 h y la 1ª que empieza entre 24–48 h.</li>
-            <li>Si no hay ventana, suele ser por lluvia prevista (pico {forecast ? `${forecast.summary.maxPrecip.toFixed(1)} mm` : '—'}) o humedad media {forecast ? `${forecast.summary.avgHumidity.toFixed(0)}%` : '—'}.</li>
-          </ul>
-        </div>
-
         <div className="status-grid">
           <div className={cardClass}>
             <div className="status-head">
@@ -841,42 +831,6 @@ function App() {
             ) : (
               <p className="muted">Consulta un huerto para generar su resumen.</p>
             )}
-          </div>
-        </div>
-
-        <div className="compare-card">
-          <div className="compare-head">
-            <p className="status-label">Comparar huertos (simple)</p>
-            <Scale size={16} />
-          </div>
-          <p className="muted">
-            Elige dos huertos y compara su última recomendación y riesgo para priorizar dónde enviar cuadrillas o qué finca cortar primero.
-          </p>
-          <div className="compare-selects">
-            <select value={compareA} onChange={e => setCompareA(e.target.value)}>
-              <option value="">Huerto A</option>
-              {orchards.map(o => (
-                <option key={o.id} value={o.id}>{o.name}</option>
-              ))}
-            </select>
-            <select value={compareB} onChange={e => setCompareB(e.target.value)}>
-              <option value="">Huerto B</option>
-              {orchards.map(o => (
-                <option key={o.id} value={o.id}>{o.name}</option>
-              ))}
-            </select>
-          </div>
-          <div className="compare-body">
-            <div>
-              <p className="metric-label">Huerto A</p>
-              <p className="metric-value">{compareResult.a?.lastDecision?.verdict || '—'}</p>
-              <p className="muted">Riesgo: {compareResult.a?.lastDecision?.level || '—'}</p>
-            </div>
-            <div>
-              <p className="metric-label">Huerto B</p>
-              <p className="metric-value">{compareResult.b?.lastDecision?.verdict || '—'}</p>
-              <p className="muted">Riesgo: {compareResult.b?.lastDecision?.level || '—'}</p>
-            </div>
           </div>
         </div>
 
