@@ -1,0 +1,75 @@
+.impact-chart {
+  background: var(--white);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  padding: 2rem;
+}
+
+.chart-header {
+  margin-bottom: 2rem;
+}
+
+.chart-header h3 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--dark);
+  margin-bottom: 0.5rem;
+}
+
+.chart-header p {
+  color: var(--gray);
+  font-size: 0.95rem;
+}
+
+.chart-container {
+  margin-bottom: 2rem;
+}
+
+.chart-legend-custom {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--border);
+}
+
+.legend-item {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.legend-color {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.legend-item.loss .legend-color {
+  background: var(--danger);
+}
+
+.legend-item.profit .legend-color {
+  background: var(--success);
+}
+
+.legend-label {
+  font-weight: 700;
+  color: var(--dark);
+  margin-bottom: 0.25rem;
+}
+
+.legend-description {
+  font-size: 0.85rem;
+  color: var(--gray);
+  line-height: 1.4;
+}
+
+@media (max-width: 768px) {
+  .chart-legend-custom {
+    grid-template-columns: 1fr;
+  }
+}
+
+

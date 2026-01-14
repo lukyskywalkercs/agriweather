@@ -1,0 +1,20 @@
+[
+  {
+    "nombre": "Finca La Plana - Villarreal",
+    "latitud": 39.9387,
+    "longitud": -0.101,
+    "variedad": "Clementina"
+  },
+  {
+    "nombre": "Partida Madrigal - Almassora",
+    "latitud": 39.945,
+    "longitud": -0.065,
+    "variedad": "Navel"
+  },
+  {
+    "nombre": "Huerto San José - Burriana",
+    "latitud": 39.889,
+    "longitud": -0.084,
+    "variedad": "Valencia Late"
+  }
+]
