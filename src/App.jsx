@@ -218,11 +218,11 @@ function App() {
     if (!coords?.lat || !coords?.lon) return
     const fetchProvince = async () => {
       try {
-        const url = `https://geocoding-api.open-meteo.com/v1/reverse?latitude=${coords.lat}&longitude=${coords.lon}&language=es&count=1`
+        const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${coords.lat}&lon=${coords.lon}&accept-language=es&email=lucaslucas197739@gmail.com`
         const res = await fetch(url)
         if (!res.ok) throw new Error('No se pudo obtener la provincia')
         const data = await res.json()
-        const name = data?.results?.[0]?.admin1 || '—'
+        const name = data?.address?.province || data?.address?.state || '—'
         setProvinceName(name)
       } catch (err) {
         setProvinceName('—')
