@@ -3,7 +3,7 @@ import './App.css'
 import 'leaflet/dist/leaflet.css'
 import { MapContainer, Marker, Popup, TileLayer, useMap } from 'react-leaflet'
 import { Icon } from 'leaflet'
-import { CheckCircle, AlertTriangle, Octagon, MapPin, Save, Clock, Printer, Scale, LogOut, Trash2 } from 'lucide-react'
+import { CheckCircle, AlertTriangle, Octagon, MapPin, Save, Clock, Printer, Scale, LogOut, Trash2, Edit3 } from 'lucide-react'
 
 const markerIcon = new Icon({
   iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
@@ -107,7 +107,7 @@ function evaluateDecision(hourly, windows) {
 }
 
 function App() {
-  const [input, setInput] = useState(`${DEFAULT_COORDS.lat}, ${DEFAULT_COORDS.lon}`)
+  const [input, setInput] = useState('')
   const [coords, setCoords] = useState(DEFAULT_COORDS)
   const [orchardName, setOrchardName] = useState('Huerto actual')
   const [orchards, setOrchards] = useState([])
@@ -212,12 +212,15 @@ function App() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       })
-      if (!res.ok) throw new Error('No se pudo guardar el huerto')
+      if (!res.ok) {
+        const message = await res.text()
+        throw new Error(message || 'No se pudo guardar el huerto')
+      }
       const payload = await res.json()
       setOrchards(payload.orchards || [])
       if (!selectedId && payload.orchards?.length) setSelectedId(payload.orchards[0].id)
     } catch (err) {
-      console.error(err)
+      setError(err.message || 'Error al guardar huerto')
     }
   }
 
@@ -266,6 +269,13 @@ function App() {
   }
 
   const handleSelectOrchard = orchard => {
+    setSelectedId(orchard.id)
+    setOrchardName(orchard.name)
+    setInput(`${orchard.lat}, ${orchard.lon}`)
+    setCoords({ lat: orchard.lat, lon: orchard.lon })
+  }
+
+  const handleEditOrchard = orchard => {
     setSelectedId(orchard.id)
     setOrchardName(orchard.name)
     setInput(`${orchard.lat}, ${orchard.lon}`)
@@ -348,7 +358,7 @@ function App() {
     setOrchards([])
     setSelectedId(null)
     setCoords(DEFAULT_COORDS)
-    setInput(`${DEFAULT_COORDS.lat}, ${DEFAULT_COORDS.lon}`)
+    setInput('')
     setDecision(null)
     setForecast(null)
     setRegisterOpen(true)
@@ -460,6 +470,13 @@ function App() {
                     <div className={`pill ${o.lastDecision?.level || 'neutral'}`}>
                       {o.lastDecision?.verdict || '—'}
                     </div>
+                  </button>
+                  <button
+                    className="edit-orchard-btn"
+                    onClick={e => { e.stopPropagation(); handleEditOrchard(o) }}
+                    title="Editar huerto"
+                  >
+                    <Edit3 size={14} />
                   </button>
                   <button
                     className="delete-orchard-btn"

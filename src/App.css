@@ -498,6 +498,21 @@
   border-left: 1px solid #e2e8f0;
 }
 
+.edit-orchard-btn {
+  padding: 10px 8px;
+  border: none;
+  background: transparent;
+  color: #64748b;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.edit-orchard-btn:hover {
+  background: #e5e7eb;
+  color: #0f172a;
+}
+
 .delete-orchard-btn:hover {
   background: #fee2e2;
   color: #b91c1c;

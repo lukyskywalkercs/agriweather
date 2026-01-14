@@ -22,6 +22,18 @@ exports.handler = async (event) => {
     if (!userId || !orchard || !decision) return { statusCode: 400, headers, body: 'Missing data' }
     const { name, lat, lon, id } = orchard
 
+    // Limit of 10 orchards per user (FREE)
+    if (!id) {
+      const { count, error: countErr } = await supabase
+        .from('orchards')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', userId)
+      if (countErr) throw countErr
+      if ((count || 0) >= 10) {
+        return { statusCode: 400, headers, body: 'Límite de 10 huertos alcanzado en la versión actual.' }
+      }
+    }
+
     // Upsert orchard
     const orchardPayload = {
       user_id: userId,
