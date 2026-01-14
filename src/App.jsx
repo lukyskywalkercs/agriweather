@@ -262,11 +262,16 @@ function App() {
   const firstWindow = decision?.windows?.[0] || null
   const firstWindow24 = useMemo(() => {
     if (!decision?.windows?.length) return null
-    return decision.windows.find(w => (Date.parse(w.start) - Date.now()) / (1000 * 60 * 60) <= 24) || null
+    const now = Date.now()
+    return decision.windows.find(w => (Date.parse(w.start) - now) / (1000 * 60 * 60) <= 24) || null
   }, [decision])
   const firstWindow48 = useMemo(() => {
     if (!decision?.windows?.length) return null
-    return decision.windows.find(w => (Date.parse(w.start) - Date.now()) / (1000 * 60 * 60) <= 48) || null
+    const now = Date.now()
+    return decision.windows.find(w => {
+      const hours = (Date.parse(w.start) - now) / (1000 * 60 * 60)
+      return hours > 24 && hours <= 48
+    }) || null
   }, [decision])
 
   const handleSaveOrchard = () => {
@@ -618,15 +623,23 @@ function App() {
                 </div>
                 <div>
                   <p className="metric-label">Ventana &lt; 24h</p>
-                  <p className={`metric-value ${firstWindow24 ? 'highlight' : ''}`}>
-                    {firstWindow24 ? new Date(firstWindow24.start).toLocaleString() : '—'}
-                  </p>
+                  {firstWindow24 ? (
+                    <p className={`metric-value highlight`}>
+                      {new Date(firstWindow24.start).toLocaleDateString()} · {new Date(firstWindow24.start).toLocaleTimeString()} → {new Date(firstWindow24.end).toLocaleTimeString()}
+                    </p>
+                  ) : (
+                    <p className="metric-value">No detectada</p>
+                  )}
                 </div>
                 <div>
                   <p className="metric-label">Ventana &lt;= 48h</p>
-                  <p className={`metric-value ${firstWindow48 ? 'highlight' : ''}`}>
-                    {firstWindow48 ? new Date(firstWindow48.start).toLocaleString() : '—'}
-                  </p>
+                  {firstWindow48 ? (
+                    <p className={`metric-value highlight`}>
+                      {new Date(firstWindow48.start).toLocaleDateString()} · {new Date(firstWindow48.start).toLocaleTimeString()} → {new Date(firstWindow48.end).toLocaleTimeString()}
+                    </p>
+                  ) : (
+                    <p className="metric-value">No detectada</p>
+                  )}
                 </div>
               </div>
             </div>
@@ -680,12 +693,28 @@ function App() {
               {!trialExpired && (
                 <div className="dry-highlight-row">
                   <div className="dry-highlight">
-                    <p className="metric-label">Ventana &lt; 24h</p>
-                    <p className="metric-value highlight">{firstWindow24 ? `${new Date(firstWindow24.start).toLocaleString()} → ${new Date(firstWindow24.end).toLocaleString()}` : 'No detectada'}</p>
+                    <p className="metric-label">1ª ventana en 24h</p>
+                    {firstWindow24 ? (
+                      <p className="metric-value highlight">
+                        {new Date(firstWindow24.start).toLocaleDateString()} · {new Date(firstWindow24.start).toLocaleTimeString()} → {new Date(firstWindow24.end).toLocaleTimeString()}
+                      </p>
+                    ) : (
+                      <p className="metric-value">
+                        No detectada. Posible causa: lluvia prevista (pico {forecast ? forecast.summary.maxPrecip.toFixed(1) : '—'} mm) o humedad media {forecast ? forecast.summary.avgHumidity.toFixed(0) : '—'}%.
+                      </p>
+                    )}
                   </div>
                   <div className="dry-highlight">
-                    <p className="metric-label">Ventana &lt;= 48h</p>
-                    <p className="metric-value highlight">{firstWindow48 ? `${new Date(firstWindow48.start).toLocaleString()} → ${new Date(firstWindow48.end).toLocaleString()}` : 'No detectada'}</p>
+                    <p className="metric-label">1ª ventana en 48h</p>
+                    {firstWindow48 ? (
+                      <p className="metric-value highlight">
+                        {new Date(firstWindow48.start).toLocaleDateString()} · {new Date(firstWindow48.start).toLocaleTimeString()} → {new Date(firstWindow48.end).toLocaleTimeString()}
+                      </p>
+                    ) : (
+                      <p className="metric-value">
+                        No detectada. Posible causa: lluvia prevista (pico {forecast ? forecast.summary.maxPrecip.toFixed(1) : '—'} mm) o humedad media {forecast ? forecast.summary.avgHumidity.toFixed(0) : '—'}%.
+                      </p>
+                    )}
                   </div>
                 </div>
               )}
