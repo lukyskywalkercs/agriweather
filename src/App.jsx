@@ -595,6 +595,16 @@ function App() {
           </div>
         </div>
 
+        <div className="info-card">
+          <p className="status-label">Info ventana de secado</p>
+          <ul className="info-list">
+            <li>Se calcula con la previsión real de las próximas 48 h (Open-Meteo).</li>
+            <li>Busca tramos de 6 h con lluvia ≤ 0.1 mm/h y humedad &lt; 85%, deslizándose hora a hora (puede haber solapes si sigue seco).</li>
+            <li>Destacamos la 1ª ventana que empieza en &lt;24 h y la 1ª que empieza entre 24–48 h.</li>
+            <li>Si no hay ventana, suele ser por lluvia prevista (pico {forecast ? `${forecast.summary.maxPrecip.toFixed(1)} mm` : '—'}) o humedad media {forecast ? `${forecast.summary.avgHumidity.toFixed(0)}%` : '—'}.</li>
+          </ul>
+        </div>
+
         <div className="status-grid">
           <div className={cardClass}>
             <div className="status-head">
@@ -687,9 +697,6 @@ function App() {
                   {windowsCount} ventana(s) seca(s) detectadas en las próximas 48 h. Primera ventana: {new Date(firstWindow.start).toLocaleString()} → {new Date(firstWindow.end).toLocaleString()}, humedad media {firstWindow.avgHumidity.toFixed(0)}%, precip máx {firstWindow.maxPrecip.toFixed(1)} mm/h.
                 </p>
               )}
-              <p className="dry-note">
-                Las ventanas se cuentan con tramos de 6 h que se desplazan hora a hora; pueden aparecer ventanas solapadas si todo sigue seco. “1ª ventana en 24h” = primer tramo que empieza dentro de las próximas 24h desde ahora (hora local). “1ª ventana en 48h” = primer tramo que empieza entre 24 y 48h; si no aparece, suele deberse a lluvia o humedad alta.
-              </p>
               {!trialExpired && (
                 <div className="dry-highlight-row">
                   <div className="dry-highlight">
