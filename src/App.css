@@ -342,6 +342,13 @@
   font-size: 14px;
 }
 
+.dry-summary {
+  margin: 4px 0 6px;
+  color: #475569;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
 .dry-empty {
   margin: 0;
   color: #475569;

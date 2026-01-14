@@ -251,6 +251,9 @@ function App() {
     return 'Bajo'
   }, [forecast])
 
+  const windowsCount = decision?.windows?.length || 0
+  const firstWindow = decision?.windows?.[0] || null
+
   const handleSaveOrchard = () => {
     if (trialExpired) return
     const parsed = parseCoords(input)
@@ -408,7 +411,7 @@ function App() {
                 {loading ? 'Actualizando...' : 'Consultar'}
               </button>
             </div>
-            <p className="coords-hint">Solo la primera vez por huerto; después usa 'Mis huertos'.</p>
+            <p className="coords-hint">Solo la primera vez por huerto. Guárdalo y después usa 'Mis huertos'.</p>
             {error && <p className="error">{error}</p>}
           </form>
 
@@ -529,6 +532,11 @@ function App() {
           <div className="dry-header">
             <div>
               <p className="status-label">Ventana de secado</p>
+              {!trialExpired && windowsCount > 0 && firstWindow && (
+                <p className="dry-summary">
+                  {windowsCount} ventana(s) seca(s) detectadas en las próximas 48 h. Primera ventana: {new Date(firstWindow.start).toLocaleString()} → {new Date(firstWindow.end).toLocaleString()}, humedad media {firstWindow.avgHumidity.toFixed(0)}%, precip máx {firstWindow.maxPrecip.toFixed(1)} mm/h.
+                </p>
+              )}
               <h3>Cómo se calcula</h3>
             </div>
             <p className="chip">Criterio: 6 h seguidas con lluvia &lt;= 0.1 mm/h y humedad &lt; 85%</p>
