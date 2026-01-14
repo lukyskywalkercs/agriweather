@@ -3,7 +3,7 @@ import './App.css'
 import 'leaflet/dist/leaflet.css'
 import { MapContainer, Marker, Popup, TileLayer, useMap } from 'react-leaflet'
 import { Icon } from 'leaflet'
-import { CheckCircle, AlertTriangle, Octagon, MapPin, Save, Clock, Printer, Scale, LogOut, Trash2, Edit3 } from 'lucide-react'
+import { CheckCircle, AlertTriangle, Octagon, MapPin, Save, Clock, Printer, LogOut, Trash2, Edit3, ChevronDown, ChevronUp } from 'lucide-react'
 
 const markerIcon = new Icon({
   iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
@@ -137,6 +137,7 @@ function App() {
   const [showHistory, setShowHistory] = useState(false)
   const [showMap, setShowMap] = useState(false)
   const [showMetrics, setShowMetrics] = useState(false)
+  const [showWeekly, setShowWeekly] = useState(false)
   const [editOrchardId, setEditOrchardId] = useState(null)
   const [editOrchardName, setEditOrchardName] = useState('')
   const [editOrchardCoords, setEditOrchardCoords] = useState('')
@@ -278,6 +279,28 @@ function App() {
       return hours > 24 && hours <= 48
     }) || null
   }, [decision])
+  const nextWindow = firstWindow24 || firstWindow48 || firstWindow
+
+  const sealText = useMemo(() => {
+    if (!decision) return ''
+    if (decision.level === 'red') return 'No se recomienda recolectar hoy'
+    if (decision.level === 'amber') return 'Recomendación condicionada: espera la ventana segura'
+    return 'Se recomienda recolectar hoy'
+  }, [decision])
+
+  const nextWindowText = useMemo(() => {
+    if (!nextWindow) return 'No hay ventana segura en las próximas 48 h.'
+    const start = new Date(nextWindow.start)
+    const end = new Date(nextWindow.end)
+    const now = new Date()
+    const sameDay = start.toDateString() === now.toDateString()
+    const tomorrow = new Date(now)
+    tomorrow.setDate(now.getDate() + 1)
+    const isTomorrow = start.toDateString() === tomorrow.toDateString()
+    const morning = start.getHours() < 12
+    const dayLabel = sameDay ? 'hoy' : isTomorrow ? (morning ? 'mañana por la mañana' : 'mañana') : start.toLocaleDateString()
+    return `Existe una ventana segura ${dayLabel} de ${start.toLocaleTimeString()} a ${end.toLocaleTimeString()}.`
+  }, [nextWindow])
   const validityUntil = forecast?.hourly?.time?.[47] || null
 
   const handleSaveOrchard = () => {
@@ -462,6 +485,11 @@ function App() {
     }
   }
 
+  const validityUntil = useMemo(() => {
+    const ts = Date.now() + 48 * 60 * 60 * 1000
+    return new Date(ts).toLocaleString()
+  }, [])
+
   return (
     <main className="app">
       <header className="hero">
@@ -614,15 +642,14 @@ function App() {
         <div className="status-grid">
           <div className={cardClass}>
             <div className="status-head">
-              <p className="status-label">Resultado principal</p>
+              <p className="status-label title-lg">Resultado principal</p>
               {statusIcon}
             </div>
             <h2>{decision ? decision.verdict : 'Introduce coordenadas'}</h2>
-            <p className="seal">{decision ? `${decision.verdict === 'RECOLECTAR' ? 'Se recomienda recolectar hoy' : 'No se recomienda recolectar hoy'}` : ''}</p>
+            {decision && <p className="seal">{sealText}</p>}
+            <p className="validity">Válida hasta {validityUntil}</p>
+            <p className="next-window">{nextWindowText}</p>
             <p className="status-reason">{decision ? decision.reason : 'Esperando ubicación válida.'}</p>
-            {validityUntil && (
-              <p className="status-validity">Válido hasta: {new Date(validityUntil).toLocaleString()}</p>
-            )}
             <div className="summary">
               <p className="summary-title">Resumen rápido</p>
               <p className="summary-description">
@@ -716,160 +743,176 @@ function App() {
         </div>
 
         <div className="dry-section">
-          <div className="dry-header">
-            <div>
-              <p className="status-label">Ventana de secado</p>
-              {!trialExpired && windowsCount > 0 && firstWindow && (
-                <p className="dry-summary">
-                  {windowsCount} ventana(s) seca(s) detectadas en las próximas 48 h. Primera ventana: {new Date(firstWindow.start).toLocaleString()} → {new Date(firstWindow.end).toLocaleString()}, humedad media {firstWindow.avgHumidity.toFixed(0)}%, precip máx {firstWindow.maxPrecip.toFixed(1)} mm/h.
-                </p>
-              )}
-              {!trialExpired && (
-                <div className="dry-highlight-row">
-                  <div className="dry-highlight">
-                    <p className="metric-label">1ª ventana en 24h</p>
-                    {firstWindow24 ? (
-                      <p className="metric-value highlight">
-                        {new Date(firstWindow24.start).toLocaleDateString()} · {new Date(firstWindow24.start).toLocaleTimeString()} → {new Date(firstWindow24.end).toLocaleTimeString()}
-                      </p>
-                    ) : (
-                      <p className="metric-value">
-                        No detectada. Posible causa: lluvia prevista (pico {forecast ? forecast.summary.maxPrecip.toFixed(1) : '—'} mm) o humedad media {forecast ? forecast.summary.avgHumidity.toFixed(0) : '—'}%.
-                      </p>
-                    )}
-                  </div>
-                  <div className="dry-highlight">
-                    <p className="metric-label">1ª ventana en 48h</p>
-                    {firstWindow48 ? (
-                      <p className="metric-value highlight">
-                        {new Date(firstWindow48.start).toLocaleDateString()} · {new Date(firstWindow48.start).toLocaleTimeString()} → {new Date(firstWindow48.end).toLocaleTimeString()}
-                      </p>
-                    ) : (
-                      <p className="metric-value">
-                        No detectada. Posible causa: lluvia prevista (pico {forecast ? forecast.summary.maxPrecip.toFixed(1) : '—'} mm) o humedad media {forecast ? forecast.summary.avgHumidity.toFixed(0) : '—'}%.
-                      </p>
-                    )}
-                  </div>
+          {!trialExpired && (
+            <div className="dry-compact">
+              <p className="status-label">Próxima ventana de secado</p>
+              <p className="next-window">{nextWindowText}</p>
+              <div className="dry-highlight-row">
+                <div className="dry-highlight">
+                  <p className="metric-label">1ª ventana en 24h</p>
+                  {firstWindow24 ? (
+                    <p className="metric-value highlight">
+                      {new Date(firstWindow24.start).toLocaleDateString()} · {new Date(firstWindow24.start).toLocaleTimeString()} → {new Date(firstWindow24.end).toLocaleTimeString()}
+                    </p>
+                  ) : (
+                    <p className="metric-value">
+                      No detectada. Posible causa: lluvia prevista (pico {forecast ? forecast.summary.maxPrecip.toFixed(1) : '—'} mm) o humedad media {forecast ? forecast.summary.avgHumidity.toFixed(0) : '—'}%.
+                    </p>
+                  )}
                 </div>
-              )}
-              <h3>Cómo se calcula</h3>
-            </div>
-            <p className="chip">Criterio: 6 h seguidas con lluvia &lt;= 0.1 mm/h y humedad &lt; 85%</p>
-          </div>
-          {!trialExpired && decision?.windows?.length ? (
-            <ul className="dry-list">
-              {decision.windows.slice(0, 3).map((win, idx) => (
-                <li key={idx} className="dry-item">
-                  <div className="dry-times">
-                    <span>{new Date(win.start).toLocaleString()}</span>
-                    <span>→</span>
-                    <span>{new Date(win.end).toLocaleString()}</span>
-                  </div>
-                  <div className="dry-metrics">
-                    <span>Humedad media: {win.avgHumidity.toFixed(0)}%</span>
-                    <span>Precip máx: {win.maxPrecip.toFixed(1)} mm/h</span>
-                    <span>Viento máx: {win.maxWind.toFixed(0)} km/h</span>
-                    <span>Temp mín: {win.minTemp.toFixed(0)} °C</span>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          ) : trialExpired ? (
-            <p className="dry-empty">Vista detallada desactivada tras los 7 días de prueba. Contáctanos para activarla.</p>
-          ) : (
-            <p className="dry-empty">Aún no se detectan 6 horas seguidas suficientemente secas en las próximas 48 h.</p>
-          )}
-        </div>
-
-        <div className="metrics">
-          <p className="metrics-note">Datos agregados de la previsión real (próximas 48 h, Open-Meteo).</p>
-          <div>
-            <p className="metric-label">Precipitación máx.</p>
-            <p className="metric-value">
-              {forecast ? `${forecast.summary.maxPrecip.toFixed(1)} mm` : '—'}
-            </p>
-          </div>
-          <div>
-            <p className="metric-label">Humedad media</p>
-            <p className="metric-value">
-              {forecast ? `${forecast.summary.avgHumidity.toFixed(0)} %` : '—'}
-            </p>
-          </div>
-          <div>
-            <p className="metric-label">Viento máx.</p>
-            <p className="metric-value">
-              {forecast ? `${forecast.summary.maxWind.toFixed(0)} km/h` : '—'}
-            </p>
-          </div>
-          <div>
-            <p className="metric-label">Temp. mínima</p>
-            <p className="metric-value">
-              {forecast ? `${forecast.summary.minTemp.toFixed(0)} °C` : '—'}
-            </p>
-          </div>
-        </div>
-
-        <div className="history-card">
-          <div className="history-head">
-            <div className="history-title">
-              <p className="status-label">Histórico (últimas 3)</p>
-              <span className="history-orchard">{selectedOrchard?.name || 'Huerto no identificado'}</span>
-            </div>
-            <Clock size={16} />
-          </div>
-          {!trialExpired && selectedOrchard?.history?.length ? (
-            <ul className="history-list">
-              {selectedOrchard.history.map((h, idx) => (
-                <li key={idx}>
-                  <span className={`pill ${h.verdict.includes('NO') ? 'red' : h.verdict.includes('ESPERAR') ? 'amber' : 'green'}`}>
-                    {h.verdict}
-                  </span>
-                  <span>{new Date(h.timestamp).toLocaleString()}</span>
-                </li>
-              ))}
-            </ul>
-          ) : trialExpired ? (
-            <p className="muted">Histórico desactivado tras la prueba. Contáctanos para más.</p>
-          ) : (
-            <p className="muted">Sin histórico aún.</p>
-          )}
-        </div>
-
-        <div className="summary-row">
-          <div className="weekly-card">
-            <p className="status-label">Resumen semanal básico</p>
-            {selectedOrchard && decision ? (
-              <div className="weekly-content">
-                <div className="weekly-item">
-                  <span className="weekly-label">Huerto:</span>
-                  <span className="weekly-value">{selectedOrchard.name}</span>
+                <div className="dry-highlight">
+                  <p className="metric-label">1ª ventana 24–48h</p>
+                  {firstWindow48 ? (
+                    <p className="metric-value highlight">
+                      {new Date(firstWindow48.start).toLocaleDateString()} · {new Date(firstWindow48.start).toLocaleTimeString()} → {new Date(firstWindow48.end).toLocaleTimeString()}
+                    </p>
+                  ) : (
+                    <p className="metric-value">
+                      No detectada. Posible causa: lluvia prevista (pico {forecast ? forecast.summary.maxPrecip.toFixed(1) : '—'} mm) o humedad media {forecast ? forecast.summary.avgHumidity.toFixed(0) : '—'}%.
+                    </p>
+                  )}
                 </div>
-                <div className="weekly-item">
-                  <span className="weekly-label">Recomendación actual:</span>
-                  <span className={`weekly-value pill ${decision.level}`}>{decision.verdict}</span>
-                </div>
-                <div className="weekly-item">
-                  <span className="weekly-label">Riesgo principal:</span>
-                  <span className="weekly-value">{primaryRisk}</span>
-                </div>
-                {selectedOrchard.history?.length > 0 && (
-                  <>
-                    <div className="weekly-item">
-                      <span className="weekly-label">Última consulta:</span>
-                      <span className="weekly-value">{new Date(selectedOrchard.history[0].timestamp).toLocaleString()}</span>
-                    </div>
-                    <div className="weekly-item">
-                      <span className="weekly-label">Histórico reciente:</span>
-                      <span className="weekly-value">{selectedOrchard.history.slice(0, 3).map(h => h.verdict).join(' → ')}</span>
-                    </div>
-                  </>
-                )}
               </div>
+              <button className="ghost-btn" type="button" onClick={() => setShowDetails(!showDetails)}>
+                {showDetails ? 'Ocultar ventanas detalladas' : 'Ver ventanas detalladas'}
+              </button>
+              {showDetails && decision?.windows?.length ? (
+                <div className="dry-section">
+                  <div className="dry-header">
+                    <div>
+                      <p className="status-label">Ventanas detectadas</p>
+                    </div>
+                    <p className="chip">Criterio: 6 h seguidas con lluvia &lt;= 0.1 mm/h y humedad &lt; 85%</p>
+                  </div>
+                  <ul className="dry-list">
+                    {decision.windows.slice(0, 6).map((win, idx) => (
+                      <li key={idx} className="dry-item">
+                        <div className="dry-times">
+                          <span>{new Date(win.start).toLocaleString()}</span>
+                          <span>→</span>
+                          <span>{new Date(win.end).toLocaleString()}</span>
+                        </div>
+                        <div className="dry-metrics">
+                          <span>Humedad media: {win.avgHumidity.toFixed(0)}%</span>
+                          <span>Precip máx: {win.maxPrecip.toFixed(1)} mm/h</span>
+                          <span>Viento máx: {win.maxWind.toFixed(0)} km/h</span>
+                          <span>Temp mín: {win.minTemp.toFixed(0)} °C</span>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : showDetails && !decision?.windows?.length ? (
+                <p className="dry-empty">Aún no se detectan 6 horas seguidas suficientemente secas en las próximas 48 h.</p>
+              ) : null}
+            </div>
+          )}
+        </div>
+
+        <button className="ghost-btn" type="button" onClick={() => setShowMetrics(!showMetrics)}>
+          {showMetrics ? 'Ocultar métricas' : 'Ver métricas (48h)'}
+        </button>
+        {showMetrics && (
+          <div className="metrics">
+            <p className="metrics-note">Datos agregados de la previsión real (próximas 48 h, Open-Meteo).</p>
+            <div>
+              <p className="metric-label">Precipitación máx.</p>
+              <p className="metric-value">
+                {forecast ? `${forecast.summary.maxPrecip.toFixed(1)} mm` : '—'}
+              </p>
+            </div>
+            <div>
+              <p className="metric-label">Humedad media</p>
+              <p className="metric-value">
+                {forecast ? `${forecast.summary.avgHumidity.toFixed(0)} %` : '—'}
+              </p>
+            </div>
+            <div>
+              <p className="metric-label">Viento máx.</p>
+              <p className="metric-value">
+                {forecast ? `${forecast.summary.maxWind.toFixed(0)} km/h` : '—'}
+              </p>
+            </div>
+            <div>
+              <p className="metric-label">Temp. mínima</p>
+              <p className="metric-value">
+                {forecast ? `${forecast.summary.minTemp.toFixed(0)} °C` : '—'}
+              </p>
+            </div>
+          </div>
+        )}
+
+        <button className="ghost-btn" type="button" onClick={() => setShowHistory(!showHistory)}>
+          {showHistory ? 'Ocultar histórico' : 'Ver histórico (últimas 3)'}
+        </button>
+        {showHistory && (
+          <div className="history-card">
+            <div className="history-head">
+              <div className="history-title">
+                <p className="status-label">Histórico (últimas 3)</p>
+                <span className="history-orchard">{selectedOrchard?.name || 'Huerto no identificado'}</span>
+              </div>
+              <Clock size={16} />
+            </div>
+            {!trialExpired && selectedOrchard?.history?.length ? (
+              <ul className="history-list">
+                {selectedOrchard.history.map((h, idx) => (
+                  <li key={idx}>
+                    <span className={`pill ${h.verdict.includes('NO') ? 'red' : h.verdict.includes('ESPERAR') ? 'amber' : 'green'}`}>
+                      {h.verdict}
+                    </span>
+                    <span>{new Date(h.timestamp).toLocaleString()}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : trialExpired ? (
+              <p className="muted">Histórico desactivado tras la prueba. Contáctanos para más.</p>
             ) : (
-              <p className="muted">Consulta un huerto para generar su resumen.</p>
+              <p className="muted">Sin histórico aún.</p>
             )}
           </div>
-        </div>
+        )}
+
+        <button className="ghost-btn" type="button" onClick={() => setShowWeekly(!showWeekly)}>
+          {showWeekly ? 'Ocultar resumen semanal' : 'Ver resumen semanal'}
+        </button>
+        {showWeekly && (
+          <div className="summary-row">
+            <div className="weekly-card">
+              <p className="status-label">Resumen semanal básico</p>
+              {selectedOrchard && decision ? (
+                <div className="weekly-content">
+                  <div className="weekly-item">
+                    <span className="weekly-label">Huerto:</span>
+                    <span className="weekly-value">{selectedOrchard.name}</span>
+                  </div>
+                  <div className="weekly-item">
+                    <span className="weekly-label">Recomendación actual:</span>
+                    <span className={`weekly-value pill ${decision.level}`}>{decision.verdict}</span>
+                  </div>
+                  <div className="weekly-item">
+                    <span className="weekly-label">Riesgo principal:</span>
+                    <span className="weekly-value">{primaryRisk}</span>
+                  </div>
+                  {selectedOrchard.history?.length > 0 && (
+                    <>
+                      <div className="weekly-item">
+                        <span className="weekly-label">Última consulta:</span>
+                        <span className="weekly-value">{new Date(selectedOrchard.history[0].timestamp).toLocaleString()}</span>
+                      </div>
+                      <div className="weekly-item">
+                        <span className="weekly-label">Histórico reciente:</span>
+                        <span className="weekly-value">{selectedOrchard.history.slice(0, 3).map(h => h.verdict).join(' → ')}</span>
+                      </div>
+                    </>
+                  )}
+                </div>
+              ) : (
+                <p className="muted">Consulta un huerto para generar su resumen.</p>
+              )}
+            </div>
+          </div>
+        )}
 
         <footer className="footer">
           <p className="note">SaaS desarrollado por LIND Informática.</p>
