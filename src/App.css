@@ -667,6 +667,10 @@
   gap: 10px;
 }
 
+.trace-full {
+  grid-column: 1 / -1;
+}
+
 .support-section {
   display: flex;
   flex-direction: column;
