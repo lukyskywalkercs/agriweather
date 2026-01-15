@@ -201,7 +201,8 @@ function App() {
   const [lastValidForecast, setLastValidForecast] = useState(null)
   const [lastValidAt, setLastValidAt] = useState(null)
   const [showTech, setShowTech] = useState(false)
-  const [mapLayer, setMapLayer] = useState('precipitation')
+  const [radarTimestamp, setRadarTimestamp] = useState(null)
+  const [radarError, setRadarError] = useState('')
 
   useEffect(() => {
     if (!userId || feedbackSeen) return
@@ -366,6 +367,22 @@ function App() {
   }, [coords])
 
   useEffect(() => {
+    const fetchRadar = async () => {
+      try {
+        const res = await fetch('https://tilecache.rainviewer.com/api/maps.json')
+        if (!res.ok) throw new Error('No se pudo cargar el radar')
+        const times = await res.json()
+        if (!Array.isArray(times) || !times.length) throw new Error('Radar sin datos')
+        setRadarTimestamp(times[times.length - 1])
+        setRadarError('')
+      } catch (err) {
+        setRadarError('Radar no disponible')
+      }
+    }
+    fetchRadar()
+  }, [])
+
+  useEffect(() => {
     if (!coords?.lat || !coords?.lon) return
     const fetchProvince = async () => {
       try {
@@ -449,28 +466,10 @@ function App() {
     return 'Bajo'
   }, [activeForecast])
 
-  const mapLayerMeta = useMemo(() => {
-    const base = { label: 'Precipitación', value: null, unit: '', color: '#94a3b8' }
-    if (!activeForecast) return base
-    const { maxPrecip, avgHumidity, avgCloudcover } = activeForecast.summary
-    if (mapLayer === 'humidity') {
-      const value = Number.isFinite(avgHumidity) ? avgHumidity : null
-      const color = value === null ? '#94a3b8' : value >= 85 ? '#ef4444' : value >= 70 ? '#f59e0b' : '#22c55e'
-      return { label: 'Humedad media (48h)', value, unit: '%', color }
-    }
-    if (mapLayer === 'clouds') {
-      const value = Number.isFinite(avgCloudcover) ? avgCloudcover : null
-      const color = value === null ? '#94a3b8' : value >= 70 ? '#64748b' : value >= 40 ? '#94a3b8' : '#cbd5f5'
-      return { label: 'Nubosidad media (48h)', value, unit: '%', color }
-    }
-    const value = Number.isFinite(maxPrecip) ? maxPrecip : null
-    const color = value === null ? '#94a3b8' : value >= 1 ? '#ef4444' : value >= 0.3 ? '#f59e0b' : '#22c55e'
-    return { label: 'Precipitación (pico 48h)', value, unit: 'mm/h', color }
-  }, [activeForecast, mapLayer])
-  const mapLayerValueText = useMemo(() => {
-    if (mapLayerMeta.value === null) return '—'
-    return `${mapLayerMeta.value.toFixed(1)} ${mapLayerMeta.unit}`
-  }, [mapLayerMeta])
+  const radarUpdatedAt = useMemo(() => {
+    if (!radarTimestamp) return '—'
+    return new Date(radarTimestamp * 1000).toLocaleString()
+  }, [radarTimestamp])
 
   const windowsCount = activeDecision?.windows?.length
   const firstWindow = activeDecision?.windows?.[0] || null
@@ -872,15 +871,7 @@ function App() {
                 <span>{coords.lat.toFixed(4)}, {coords.lon.toFixed(4)}</span>
               </div>
               <div className="map-layers">
-                <button className={`layer-btn ${mapLayer === 'precipitation' ? 'active' : ''}`} type="button" onClick={() => setMapLayer('precipitation')}>
-                  Precipitación
-                </button>
-                <button className={`layer-btn ${mapLayer === 'humidity' ? 'active' : ''}`} type="button" onClick={() => setMapLayer('humidity')}>
-                  Humedad
-                </button>
-                <button className={`layer-btn ${mapLayer === 'clouds' ? 'active' : ''}`} type="button" onClick={() => setMapLayer('clouds')}>
-                  Nubosidad
-                </button>
+                <span className="map-layer-pill">Radar de lluvia</span>
               </div>
             </div>
             {systemStatus === 'no-data' ? (
@@ -892,6 +883,11 @@ function App() {
               <div className="map-empty">
                 <p className="muted">Cargando datos meteorológicos...</p>
               </div>
+            ) : radarError ? (
+              <div className="map-empty">
+                <p className="map-error">{radarError}</p>
+                <p className="muted">No se pudo cargar el radar de lluvia.</p>
+              </div>
             ) : (
               <>
                 <div className="map-wrapper">
@@ -901,10 +897,17 @@ function App() {
                       attribution='&copy; OpenStreetMap contributors'
                       url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                     />
+                    {radarTimestamp && (
+                      <TileLayer
+                        attribution='&copy; RainViewer'
+                        url={`https://tilecache.rainviewer.com/v2/radar/${radarTimestamp}/256/{z}/{x}/{y}/2/1_1.png`}
+                        opacity={0.7}
+                      />
+                    )}
                     <Circle
                       center={[coords.lat, coords.lon]}
                       radius={6000}
-                      pathOptions={{ color: mapLayerMeta.color, fillColor: mapLayerMeta.color, fillOpacity: 0.25 }}
+                      pathOptions={{ color: '#0ea5e9', fillColor: '#0ea5e9', fillOpacity: 0.18 }}
                     />
                     <Marker position={[coords.lat, coords.lon]} icon={markerIcon}>
                       <Popup>Huerto cítrico</Popup>
@@ -913,10 +916,10 @@ function App() {
                 </div>
                 <div className="map-legend">
                   <div>
-                    <p className="metric-label">{mapLayerMeta.label}</p>
-                    <p className="metric-value">{mapLayerValueText}</p>
+                    <p className="metric-label">Radar de lluvia</p>
+                    <p className="metric-value">Actualizado: {radarUpdatedAt}</p>
                   </div>
-                  <span className="map-legend-note">Capa 48h (Open-Meteo)</span>
+                  <span className="map-legend-note">RainViewer</span>
                 </div>
               </>
             )}

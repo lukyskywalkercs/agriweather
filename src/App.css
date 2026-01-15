@@ -362,6 +362,16 @@
   flex-wrap: wrap;
 }
 
+.map-layer-pill {
+  border: 1px solid #cbd5e1;
+  background: #f8fafc;
+  color: #0f172a;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 12px;
+}
+
 .layer-btn {
   border: 1px solid #cbd5e1;
   background: #ffffff;
