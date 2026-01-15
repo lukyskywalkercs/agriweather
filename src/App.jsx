@@ -262,8 +262,8 @@ function App() {
   }, [adminUsers])
 
   useEffect(() => {
-    setRegisterOpen(true)
-  }, [])
+    if (!isAdminView) setRegisterOpen(true)
+  }, [isAdminView])
 
 
   useEffect(() => {
