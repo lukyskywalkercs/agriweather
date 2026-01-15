@@ -175,6 +175,7 @@ function App() {
   const [registerOpen, setRegisterOpen] = useState(false)
   const [registerName, setRegisterName] = useState('')
   const [registerEmail, setRegisterEmail] = useState('')
+  const [registerPassword, setRegisterPassword] = useState('')
   const [registerError, setRegisterError] = useState('')
   const [registerLoading, setRegisterLoading] = useState(false)
   const [demoOpen, setDemoOpen] = useState(false)
@@ -642,10 +643,11 @@ function App() {
   const handleRegisterSubmit = async event => {
     event.preventDefault()
     setRegisterError('')
-    if (!registerName.trim() || !registerEmail.trim()) {
-      setRegisterError('Nombre y correo son obligatorios.')
+    if (!registerEmail.trim() || !registerPassword.trim()) {
+      setRegisterError('Usuario y contraseña son obligatorios.')
       return
     }
+    const effectiveName = registerName.trim() || registerEmail.trim()
     setRegisterLoading(true)
     try {
       // LIMPIAR ESTADO ANTES DE CARGAR NUEVOS DATOS (CRÍTICO PARA SEGURIDAD)
@@ -670,12 +672,12 @@ function App() {
       const res = await fetch('/.netlify/functions/register-user', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: registerName.trim(), email: registerEmail.trim() }),
+        body: JSON.stringify({ name: effectiveName, email: registerEmail.trim() }),
       })
       if (!res.ok) throw new Error('No se pudo guardar tus datos.')
       const payload = await res.json()
       setUserId(payload.userId)
-      setUserName(payload.userName || registerName.trim())
+      setUserName(payload.userName || effectiveName)
       setTrialStart(payload.trialStart)
       setTrialDay(payload.trialDay)
       setFeedbackSeen(Boolean(payload.feedbackSeen))
@@ -1307,20 +1309,23 @@ function App() {
               Solo se solicita una vez. Puedes usar datos ficticios. Se almacena en Supabase para operar el servicio; no enviaremos correos ni te añadiremos a ninguna newsletter. Cumplimos LOPD y política de cookies. Al continuar aceptas cookies operativas.
             </p>
             <form className="feedback-form" onSubmit={handleRegisterSubmit}>
-              <label>Nombre</label>
-              <input
-                type="text"
-                value={registerName}
-                onChange={e => setRegisterName(e.target.value)}
-                placeholder="Tu nombre"
-                required
-              />
-              <label>Correo electrónico</label>
+              <label>Usuario (correo)</label>
               <input
                 type="email"
                 value={registerEmail}
-                onChange={e => setRegisterEmail(e.target.value)}
+                onChange={e => {
+                  setRegisterEmail(e.target.value)
+                  setRegisterName(e.target.value)
+                }}
                 placeholder="tuemail@ejemplo.com"
+                required
+              />
+              <label>Contraseña</label>
+              <input
+                type="password"
+                value={registerPassword}
+                onChange={e => setRegisterPassword(e.target.value)}
+                placeholder="••••••••"
                 required
               />
               {registerError && <p className="error">{registerError}</p>}
@@ -1328,6 +1333,16 @@ function App() {
                 {registerLoading ? 'Guardando...' : 'Continuar'}
               </button>
             </form>
+            <button
+              type="button"
+              className="ghost-btn"
+              onClick={() => {
+                setRegisterOpen(false)
+                setDemoOpen(true)
+              }}
+            >
+              No tengo usuario, pedir acceso
+            </button>
           </div>
         </div>
       )}
