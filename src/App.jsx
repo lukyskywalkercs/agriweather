@@ -175,14 +175,8 @@ function App() {
   const [registerOpen, setRegisterOpen] = useState(false)
   const [registerName, setRegisterName] = useState('')
   const [registerEmail, setRegisterEmail] = useState('')
-  const [registerPassword, setRegisterPassword] = useState('')
   const [registerError, setRegisterError] = useState('')
   const [registerLoading, setRegisterLoading] = useState(false)
-  const [demoOpen, setDemoOpen] = useState(false)
-  const [demoName, setDemoName] = useState('')
-  const [demoSurname, setDemoSurname] = useState('')
-  const [demoEmail, setDemoEmail] = useState('')
-  const [demoStatus, setDemoStatus] = useState('')
   const [userId, setUserId] = useState(null)
   const [userName, setUserName] = useState('')
   const [trialStart, setTrialStart] = useState(null)
@@ -255,31 +249,6 @@ function App() {
     setRegisterOpen(true)
   }, [])
 
-  const handleDemoSubmit = event => {
-    event.preventDefault()
-    setDemoStatus('Enviando solicitud...')
-    const payload = new URLSearchParams({
-      'form-name': 'demo-request',
-      nombre: demoName,
-      apellidos: demoSurname,
-      email: demoEmail,
-    })
-    fetch('/', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: payload.toString(),
-    })
-      .then(res => {
-        if (!res.ok) throw new Error('network')
-        setDemoStatus('Solicitud enviada. Te contactamos pronto.')
-        setDemoName('')
-        setDemoSurname('')
-        setDemoEmail('')
-      })
-      .catch(() => {
-        setDemoStatus('No se pudo enviar. Inténtalo de nuevo.')
-      })
-  }
 
   useEffect(() => {
     if (!userId) return
@@ -643,8 +612,8 @@ function App() {
   const handleRegisterSubmit = async event => {
     event.preventDefault()
     setRegisterError('')
-    if (!registerEmail.trim() || !registerPassword.trim()) {
-      setRegisterError('Usuario y contraseña son obligatorios.')
+    if (!registerEmail.trim()) {
+      setRegisterError('El correo es obligatorio.')
       return
     }
     const effectiveName = registerName.trim() || registerEmail.trim()
@@ -777,9 +746,6 @@ function App() {
             Introduce las coordenadas del huerto y te mostramos una recomendación clara basada en previsión
             meteorológica real.
           </p>
-          <button className="save-btn" type="button" onClick={() => setDemoOpen(true)}>
-            Pide tu usuario
-          </button>
           <p className="badge">Día {trialDay} de 7 de prueba gratuita</p>
           {trialExpired && (
             <p className="trial-warning">Prueba finalizada: el resultado principal sigue activo; funciones avanzadas limitadas.</p>
@@ -1306,79 +1272,28 @@ function App() {
             <p className="status-label">Bienvenida/o</p>
             <h3>Identificación para el servicio</h3>
             <p className="muted">
-              Solo se solicita una vez. Puedes usar datos ficticios. Se almacena en Supabase para operar el servicio; no enviaremos correos ni te añadiremos a ninguna newsletter. Cumplimos LOPD y política de cookies. Al continuar aceptas cookies operativas.
+              Estás en un panel de prueba pero puedes añadir tus huertos y verás los datos reales de lluvia, humedad y ventanas de secado. Solo se solicita una vez. El login se hace mediante el correo electrónico. Se almacena en Supabase para operar el servicio; no enviaremos correos ni te añadiremos a ninguna newsletter. Cumplimos LOPD y política de cookies. Al continuar aceptas cookies operativas.
             </p>
             <form className="feedback-form" onSubmit={handleRegisterSubmit}>
-              <label>Usuario (correo)</label>
+              <label>Nombre</label>
+              <input
+                type="text"
+                value={registerName}
+                onChange={e => setRegisterName(e.target.value)}
+                placeholder="Tu nombre"
+              />
+              <label>Correo electrónico</label>
               <input
                 type="email"
                 value={registerEmail}
-                onChange={e => {
-                  setRegisterEmail(e.target.value)
-                  setRegisterName(e.target.value)
-                }}
+                onChange={e => setRegisterEmail(e.target.value)}
                 placeholder="tuemail@ejemplo.com"
-                required
-              />
-              <label>Contraseña</label>
-              <input
-                type="password"
-                value={registerPassword}
-                onChange={e => setRegisterPassword(e.target.value)}
-                placeholder="••••••••"
                 required
               />
               {registerError && <p className="error">{registerError}</p>}
               <button type="submit" className="save-btn" disabled={registerLoading}>
                 {registerLoading ? 'Guardando...' : 'Continuar'}
               </button>
-            </form>
-            <button
-              type="button"
-              className="ghost-btn"
-              onClick={() => {
-                setRegisterOpen(false)
-                setDemoOpen(true)
-              }}
-            >
-              No tengo usuario, pedir acceso
-            </button>
-          </div>
-        </div>
-      )}
-
-      {demoOpen && (
-        <div className="feedback-backdrop">
-          <div className="demo-card">
-            <div className="feedback-head">
-              <p className="status-label">Pide tu usuario</p>
-              <button className="close-btn" onClick={() => setDemoOpen(false)}>×</button>
-            </div>
-            <p className="muted">Te enviaremos usuario y contraseña a tu correo.</p>
-            <form className="feedback-form" onSubmit={handleDemoSubmit}>
-              <label>Nombre</label>
-              <input
-                type="text"
-                value={demoName}
-                onChange={e => setDemoName(e.target.value)}
-                required
-              />
-              <label>Apellidos</label>
-              <input
-                type="text"
-                value={demoSurname}
-                onChange={e => setDemoSurname(e.target.value)}
-                required
-              />
-              <label>Correo electrónico</label>
-              <input
-                type="email"
-                value={demoEmail}
-                onChange={e => setDemoEmail(e.target.value)}
-                required
-              />
-              {demoStatus && <p className="muted">{demoStatus}</p>}
-              <button type="submit" className="save-btn">Enviar solicitud</button>
             </form>
           </div>
         </div>
