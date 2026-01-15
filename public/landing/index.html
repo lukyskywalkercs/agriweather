@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CitrusWindow | Decisiones agrícolas operativas sin riesgo</title>
+    <meta
+      name="description"
+      content="CitrusWindow es un SaaS agrícola B2B para toma de decisiones operativas críticas: planificación de recolección, gestión de cosecha y reducción de riesgo operativo en cooperativas y almacenes."
+    />
+    <meta
+      name="keywords"
+      content="toma de decisiones agrícolas, gestión de cosecha, riesgo operativo, planificación de recolección, SaaS agrícola B2B, cooperativas, almacenes"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+      crossorigin=""
+    />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container header-content">
+        <div class="brand">
+          CitrusWindow
+          <span class="brand-claim">Ayuda a la decisión de recoger tu fruta</span>
+        </div>
+        <div class="header-cta">Demo privada bajo solicitud</div>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="container hero-grid">
+          <div class="hero-text">
+            <p class="eyebrow">CitrusWindow · SaaS agrícola B2B</p>
+            <h1>
+              Deja de adivinar. Decide con criterio cuándo recolectar la fruta.
+            </h1>
+            <p class="hero-lead">
+              CitrusWindow transforma datos meteorológicos complejos en órdenes
+              de trabajo claras. Optimiza la logística de tus huertos y elimina
+              los costes de desplazamiento fallido.
+            </p>
+            <p class="hero-sublead">
+              Especializado en recolección de cítricos.
+            </p>
+            <div class="hero-input">
+              <label for="orchard-search">Localidad o Nombre del Huerto</label>
+              <div class="input-row">
+                <input
+                  id="orchard-search"
+                  type="text"
+                  placeholder="Escribe 3 letras para buscar"
+                  autocomplete="off"
+                />
+                <button class="secondary-button" type="button" id="search-button">
+                  Buscar
+                </button>
+              </div>
+              <div class="search-results" id="search-results"></div>
+              <p class="search-note" id="search-note">
+                Localidad seleccionada: —
+              </p>
+            </div>
+            <div class="hero-actions">
+              <a class="primary-button" id="cta-hero" href="#">
+                Probar con mis huertos ahora
+              </a>
+            </div>
+          </div>
+          <div class="hero-panel">
+            <div class="panel-title">Panel de decisión</div>
+            <div class="decision-widget decision-widget-large">
+              <div class="widget-status">
+                <span class="status-label">Semáforo</span>
+                <span class="status-pill status-go is-active" id="status-operativo">OPERATIVO</span>
+                <span class="status-pill status-stop" id="status-bloqueado">BLOQUEADO</span>
+              </div>
+              <div class="widget-time">
+                <span class="widget-label">Ventana segura</span>
+                <span class="widget-value" id="window-value">—</span>
+              </div>
+              <div class="widget-time">
+                <span class="widget-label">Estado de suelo</span>
+                <span class="widget-value" id="ground-value">—</span>
+              </div>
+            </div>
+            <div class="panel-map">
+              <div class="map-header">
+                <span>Mapa de estados</span>
+                <span class="map-chip" id="radar-chip">Radar activo</span>
+              </div>
+              <div class="map-canvas" id="radar-map"></div>
+            </div>
+            <div class="humidity-chart">
+              <div class="chart-header">
+                <span>Humedad de fruta</span>
+                <span class="chart-tag" id="chart-tag">Zona crítica</span>
+              </div>
+              <div class="chart-body" id="chart-body">
+                <svg class="chart-svg" viewBox="0 0 300 140" preserveAspectRatio="none">
+                  <path id="chart-area" class="chart-area" d="" />
+                  <polyline id="chart-line" class="chart-line" points="" />
+                  <polyline id="rain-line" class="rain-line" points="" />
+                </svg>
+                <div class="chart-zone" id="chart-zone">ZONA DE CORTE PROHIBIDO</div>
+                <div class="chart-meta" id="chart-meta">Humedad actual: —</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="coste-incertidumbre">
+        <div class="container">
+          <div class="section-header">
+            <span class="section-kicker">El coste de la incertidumbre</span>
+            <h2>Cuando no hay criterio, la logística se rompe</h2>
+          </div>
+          <div class="grid-3">
+            <div class="card">
+              <div class="card-icon">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M8 4.5a2 2 0 0 1 1.8 1.1l1 2a2 2 0 0 1-.3 2.3l-1.3 1.3a12.5 12.5 0 0 0 5.3 5.3l1.3-1.3a2 2 0 0 1 2.3-.3l2 1a2 2 0 0 1 1.1 1.8V20a2 2 0 0 1-2 2h-1C8.8 22 2 15.2 2 6V5a2 2 0 0 1 2-2h4Z" />
+                  <path d="M16 5c1.3.7 2.3 1.7 3 3" />
+                  <path d="M17.5 2.5c2 1 3.5 2.5 4.5 4.5" />
+                </svg>
+              </div>
+              <h3>Llamadas interminables</h3>
+              <p>
+                Llamadas interminables a capataces para confirmar si llueve en
+                la otra punta de la provincia.
+              </p>
+            </div>
+            <div class="card">
+              <div class="card-icon">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M10 17h4a3 3 0 0 0 6 0h1v-5.5a2 2 0 0 0-2-2H16V7a2 2 0 0 0-2-2H3v10a2 2 0 0 0 2 2h2a3 3 0 0 0 3 0Z" />
+                  <path d="M16 7h3l2 3.5" />
+                  <path d="M7 17a3 3 0 1 0 0 0" />
+                  <path d="M17 17a3 3 0 1 0 0 0" />
+                  <path d="M18.5 2.5c1.6 1.2 2.5 2.8 2.5 4.5" />
+                </svg>
+              </div>
+              <h3>Camiones parados</h3>
+              <p>
+                Camiones parados y jornales pagados en huertos donde la fruta
+                sigue mojada.
+              </p>
+            </div>
+            <div class="card">
+              <div class="card-icon">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M8 3h6l4 4v14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z" />
+                  <path d="M14 3v5h5" />
+                  <path d="M12 10v5" />
+                  <path d="M12 18h0" />
+                </svg>
+              </div>
+              <h3>Reclamaciones en destino</h3>
+              <p>
+                Riesgo de reclamaciones en destino por confeccionar fruta con
+                humedad excesiva.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section alt" id="funcionalidad">
+        <div class="container">
+          <div class="section-header">
+            <span class="section-kicker">Tu mando a distancia logístico</span>
+            <h2>Información técnica convertida en órdenes de trabajo</h2>
+          </div>
+          <div class="grid-3">
+            <div class="card">
+              <h3>Ventana de secado</h3>
+              <p>
+                Calculamos el tiempo exacto de secado de la fruta cruzando
+                radiación solar, viento y humedad relativa local.
+              </p>
+            </div>
+            <div class="card">
+              <h3>Mapa de estados</h3>
+              <p>
+                Semáforo en tiempo real de todos tus huertos. Verde: Operativo |
+                Rojo: Bloqueado por humedad o barro.
+              </p>
+            </div>
+            <div class="card">
+              <h3>Predicción de carga</h3>
+              <p>
+                Anticipa la logística de la semana. Sabrás con 48h de antelación
+                qué zonas serán impracticables.
+              </p>
+            </div>
+          </div>
+          <div class="steps-highlight">
+            <div class="step-card">
+              <span class="step-number-lg">1</span>
+              <div>
+                <h3>Registra huerto</h3>
+                <p>Tu zona queda lista para el semáforo operativo.</p>
+              </div>
+            </div>
+            <div class="step-card">
+              <span class="step-number-lg">2</span>
+              <div>
+                <h3>Mira el semáforo</h3>
+                <p>Verde: operativo · Rojo: bloqueado.</p>
+              </div>
+            </div>
+            <div class="step-card">
+              <span class="step-number-lg">3</span>
+              <div>
+                <h3>Envía el camión</h3>
+                <p>Orden clara para cuadrillas y logística.</p>
+              </div>
+            </div>
+          </div>
+          <p class="steps-note">
+            Sin instalaciones. Acceso instantáneo desde cualquier móvil o tablet.
+          </p>
+        </div>
+      </section>
+
+      <section class="section" id="comparativa">
+        <div class="container">
+          <div class="section-header">
+            <span class="section-kicker">Tabla comparativa de valor</span>
+            <h2>App del tiempo vs CitrusWindow</h2>
+          </div>
+          <div class="compare-table">
+            <div class="compare-row compare-head">
+              <div></div>
+              <div>App del tiempo (Gratis)</div>
+              <div>CitrusWindow (SaaS)</div>
+            </div>
+            <div class="compare-row">
+              <div>Conoce tu fruta</div>
+              <div>No conoce tu fruta.</div>
+              <div>Te dice si la naranja está seca para ser encajada.</div>
+            </div>
+            <div class="compare-row">
+              <div>Secado</div>
+              <div>No predice el secado.</div>
+              <div>Calcula ventanas de carga.</div>
+            </div>
+            <div class="compare-row">
+              <div>Gestión de huertos</div>
+              <div>Te dice si llueve.</div>
+              <div>Guarda tus 50+ huertos.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section alt" id="cta">
+        <div class="container cta">
+          <h2>Menos viajes fallidos. Más jornales bien empleados.</h2>
+          <p>
+            CitrusWindow alinea cuadrillas, camiones y almacén con una decisión
+            operativa clara por huerto.
+          </p>
+          <a class="primary-button" id="cta-footer" href="#">
+            Probar con mis huertos ahora
+          </a>
+        </div>
+      </section>
+
+      <section class="section" id="feedback">
+        <div class="container">
+          <div class="section-header">
+            <span class="section-kicker">Mejora continua</span>
+            <h2>¿Te falta alguna característica?</h2>
+          </div>
+          <p class="section-lead">
+            Dinos qué necesidad te gustaría resolver y la valoramos para
+            incorporarla al roadmap operativo.
+          </p>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container">
+        <div class="trust-badge">
+          <span class="trust-title">Tecnología respaldada por datos oficiales</span>
+          <div class="trust-logos">
+            <span>AEMET</span>
+            <span>IVIA</span>
+          </div>
+        </div>
+        <p>
+          No es una app del tiempo. Es un modelo agronómico basado en balance
+          hídrico específico para cítricos.
+        </p>
+        <p>
+          No nos hacemos responsables de errores de predicción. Tecnología
+          basada en APIs de terceros que pueden fallar.
+        </p>
+        <p>
+          <a href="https://www.lindinformatica.com" title="https://www.lindinformatica.com">www.lindinformatica.com</a>
+          · Almassora (Castelló) · +34 689 388 980
+        </p>
+      </div>
+    </footer>
+    <a
+      class="whatsapp-button"
+      href="https://wa.me/34689388980?text=%C2%BFDudas%20t%C3%A9cnicas%3F%20Necesito%20informaci%C3%B3n%20sobre%20CitrusWindow."
+      target="_blank"
+      rel="noreferrer"
+    >
+      <span class="whatsapp-icon">WA</span>
+      ¿Dudas técnicas? Habla con un experto
+    </a>
+    <script
+      src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+      crossorigin=""
+    ></script>
+    <script>
+      const saasUrl = window.location.origin;
+      document.getElementById("cta-hero").href = saasUrl;
+      document.getElementById("cta-footer").href = saasUrl;
+
+      const searchInput = document.getElementById("orchard-search");
+      const resultsBox = document.getElementById("search-results");
+      const searchNote = document.getElementById("search-note");
+      const searchButton = document.getElementById("search-button");
+      const statusOperativo = document.getElementById("status-operativo");
+      const statusBloqueado = document.getElementById("status-bloqueado");
+      const windowValue = document.getElementById("window-value");
+      const groundValue = document.getElementById("ground-value");
+      const chartTag = document.getElementById("chart-tag");
+      const chartZone = document.getElementById("chart-zone");
+      const chartBody = document.getElementById("chart-body");
+      const chartLine = document.getElementById("chart-line");
+      const rainLine = document.getElementById("rain-line");
+      const chartArea = document.getElementById("chart-area");
+      const chartMeta = document.getElementById("chart-meta");
+      const radarChip = document.getElementById("radar-chip");
+      let searchTimer;
+      const defaultCoords = { lat: 39.5, lon: -0.4 };
+
+      const setStatus = ({ isOperative, windowText, groundText }) => {
+        statusOperativo.classList.toggle("is-active", isOperative);
+        statusBloqueado.classList.toggle("is-active", !isOperative);
+        windowValue.textContent = windowText;
+        groundValue.textContent = groundText;
+        chartTag.textContent = isOperative ? "Zona segura" : "Zona crítica";
+        chartZone.textContent = isOperative
+          ? "VENTANA SEGURA ABIERTA"
+          : "ZONA DE CORTE PROHIBIDO";
+        chartZone.classList.toggle("zone-safe", isOperative);
+        chartBody.classList.toggle("chart-safe", isOperative);
+        chartLine.classList.toggle("line-safe", isOperative);
+        chartArea.classList.toggle("area-safe", isOperative);
+      };
+
+      const formatHour = (date) =>
+        date.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" });
+
+      const findWindow = (times, precipitation, humidity) => {
+        const now = new Date();
+        const nextHours = times
+          .map((time, idx) => ({
+            time: new Date(time),
+            precipitation: precipitation[idx],
+            humidity: humidity[idx],
+          }))
+          .filter((item) => item.time >= now)
+          .slice(0, 12);
+
+        let startIndex = -1;
+        for (let i = 0; i < nextHours.length; i++) {
+          const safe =
+            nextHours[i].precipitation <= 0.1 && nextHours[i].humidity <= 85;
+          if (safe && startIndex === -1) startIndex = i;
+          if (!safe && startIndex !== -1) {
+            const duration = i - startIndex;
+            if (duration >= 3) {
+              return { start: nextHours[startIndex], end: nextHours[i - 1] };
+            }
+            startIndex = -1;
+          }
+        }
+        if (startIndex !== -1 && nextHours.length - startIndex >= 3) {
+          return {
+            start: nextHours[startIndex],
+            end: nextHours[nextHours.length - 1],
+          };
+        }
+        return null;
+      };
+
+      const buildChart = (humidityValues, rainValues) => {
+        const points = humidityValues
+          .map((value, index) => {
+            const x = (index / (humidityValues.length - 1)) * 300;
+            const y = 140 - (Math.min(100, Math.max(0, value)) / 100) * 120 - 10;
+            return `${x.toFixed(1)},${y.toFixed(1)}`;
+          })
+          .join(" ");
+        const areaPath = `${points} 300,140 0,140`;
+        chartLine.setAttribute("points", points);
+        chartArea.setAttribute("d", `M ${areaPath}`);
+
+        const maxRain = Math.max(0.1, ...rainValues);
+        const rainPoints = rainValues
+          .map((value, index) => {
+            const x = (index / (rainValues.length - 1)) * 300;
+            const normalized = Math.min(maxRain, Math.max(0, value)) / maxRain;
+            const y = 140 - normalized * 90 - 20;
+            return `${x.toFixed(1)},${y.toFixed(1)}`;
+          })
+          .join(" ");
+        rainLine.setAttribute("points", rainPoints);
+      };
+
+      const updateForecast = async (lat, lon) => {
+        try {
+          const response = await fetch(
+            `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=precipitation,relativehumidity_2m&forecast_days=2&timezone=auto`
+          );
+          if (!response.ok) throw new Error("forecast");
+          const data = await response.json();
+          const humiditySeries = data.hourly.relativehumidity_2m.slice(0, 12);
+          const rainSeries = data.hourly.precipitation.slice(0, 12);
+          buildChart(humiditySeries, rainSeries);
+          chartMeta.textContent = `Humedad actual: ${humiditySeries[0]}% · Lluvia próxima 12h: ${rainSeries
+            .reduce((sum, value) => sum + value, 0)
+            .toFixed(1)} mm`;
+          const window = findWindow(
+            data.hourly.time,
+            data.hourly.precipitation,
+            data.hourly.relativehumidity_2m
+          );
+          if (window) {
+            setStatus({
+              isOperative: true,
+              windowText: `${formatHour(window.start.time)} - ${formatHour(
+                window.end.time
+              )}`,
+              groundText: "Seco y transitable",
+            });
+          } else {
+            setStatus({
+              isOperative: false,
+              windowText: "Sin ventana segura en 12h",
+              groundText: "Húmedo o barro",
+            });
+          }
+        } catch (error) {
+          chartLine.setAttribute("points", "");
+          chartArea.setAttribute("d", "");
+          rainLine.setAttribute("points", "");
+          chartMeta.textContent = "Humedad actual: sin datos";
+          setStatus({
+            isOperative: false,
+            windowText: "Sin datos disponibles",
+            groundText: "Revisión manual necesaria",
+          });
+        }
+      };
+
+      let mapInstance;
+      let radarLayer;
+      let marker;
+      let markerIcon;
+
+      const loadRadarLayer = async () => {
+        try {
+          const response = await fetch(
+            "https://tilecache.rainviewer.com/api/maps.json"
+          );
+          const data = await response.json();
+          const radarTimestamp = data[data.length - 1];
+          radarChip.textContent = "Radar activo";
+          return L.tileLayer(
+            `https://tilecache.rainviewer.com/v2/radar/${radarTimestamp}/256/{z}/{x}/{y}/2/1_1.png`,
+            { opacity: 0.6, zIndex: 3 }
+          );
+        } catch (error) {
+          radarChip.textContent = "Radar no disponible";
+          return null;
+        }
+      };
+
+      const initMap = async (lat, lon) => {
+        if (!mapInstance) {
+          mapInstance = L.map("radar-map", {
+            zoomControl: false,
+            attributionControl: false,
+          }).setView([lat, lon], 6);
+          L.tileLayer(
+            "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
+            { opacity: 0.9 }
+          ).addTo(mapInstance);
+          markerIcon = L.icon({
+            iconUrl:
+              "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+            shadowUrl:
+              "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+          });
+          marker = L.marker([lat, lon], { icon: markerIcon }).addTo(mapInstance);
+          radarLayer = await loadRadarLayer();
+          if (radarLayer) {
+            radarLayer.addTo(mapInstance);
+          }
+          setTimeout(() => mapInstance.invalidateSize(), 0);
+        } else {
+          mapInstance.setView([lat, lon], 6);
+          marker.setLatLng([lat, lon]);
+          if (radarLayer) {
+            mapInstance.removeLayer(radarLayer);
+          }
+          radarLayer = await loadRadarLayer();
+          if (radarLayer) {
+            radarLayer.addTo(mapInstance);
+          }
+          mapInstance.invalidateSize();
+        }
+      };
+
+      const clearResults = () => {
+        resultsBox.innerHTML = "";
+        resultsBox.style.display = "none";
+      };
+
+      const renderResults = (items) => {
+        if (!items.length) {
+          clearResults();
+          return;
+        }
+        resultsBox.innerHTML = items
+          .map(
+            (item) =>
+              `<button type="button" data-name="${item.display_name}" data-lat="${item.lat}" data-lon="${item.lon}">${item.display_name}</button>`
+          )
+          .join("");
+        resultsBox.style.display = "grid";
+      };
+
+      const fetchLocations = async (query) => {
+        const response = await fetch(
+          `https://nominatim.openstreetmap.org/search?format=json&limit=5&accept-language=es&q=${encodeURIComponent(
+            query
+          )}`
+        );
+        if (!response.ok) return [];
+        return response.json();
+      };
+
+      searchInput.addEventListener("input", () => {
+        const query = searchInput.value.trim();
+        if (query.length < 3) {
+          clearResults();
+          return;
+        }
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(async () => {
+          const items = await fetchLocations(query);
+          renderResults(items);
+        }, 350);
+      });
+
+      resultsBox.addEventListener("click", (event) => {
+        const button = event.target.closest("button");
+        if (!button) return;
+        const selection = button.getAttribute("data-name");
+        const lat = Number(button.getAttribute("data-lat"));
+        const lon = Number(button.getAttribute("data-lon"));
+        searchInput.value = selection;
+        searchNote.textContent = `Localidad seleccionada: ${selection}`;
+        clearResults();
+        initMap(lat, lon);
+        updateForecast(lat, lon);
+      });
+
+      searchButton.addEventListener("click", async () => {
+        const query = searchInput.value.trim();
+        if (query.length < 3) return;
+        const items = await fetchLocations(query);
+        renderResults(items);
+        if (items[0]) {
+          const selection = items[0].display_name;
+          const lat = Number(items[0].lat);
+          const lon = Number(items[0].lon);
+          searchNote.textContent = `Localidad seleccionada: ${selection}`;
+          initMap(lat, lon);
+          updateForecast(lat, lon);
+        }
+      });
+
+      searchInput.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          searchButton.click();
+        }
+      });
+
+      initMap(defaultCoords.lat, defaultCoords.lon);
+      setStatus({
+        isOperative: false,
+        windowText: "Selecciona una localidad",
+        groundText: "Pendiente de análisis",
+      });
+
+      document.addEventListener("click", (event) => {
+        if (!resultsBox.contains(event.target) && event.target !== searchInput) {
+          clearResults();
+        }
+      });
+    </script>
+  </body>
+</html>
