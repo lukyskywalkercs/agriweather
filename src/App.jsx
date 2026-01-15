@@ -209,6 +209,13 @@ function App() {
   const [adminLoading, setAdminLoading] = useState(false)
 
   useEffect(() => {
+    const storedEmail = localStorage.getItem('cw_email')
+    if (storedEmail && !registerEmail) {
+      setRegisterEmail(storedEmail)
+    }
+  }, [registerEmail])
+
+  useEffect(() => {
     if (!userId || feedbackSeen) return
     const timer = setTimeout(() => setFeedbackOpen(true), 5 * 60 * 1000)
     return () => clearTimeout(timer)
@@ -665,6 +672,11 @@ function App() {
       setUserName(payload.userName || effectiveName)
       setTrialStart(payload.trialStart)
       setTrialDay(payload.trialDay)
+      try {
+        localStorage.setItem('cw_email', registerEmail.trim())
+      } catch (err) {
+        // Ignorar fallos de almacenamiento del navegador
+      }
       setFeedbackSeen(Boolean(payload.feedbackSeen))
       setOrchards(payload.orchards || [])
       if (payload.orchards?.length) {
@@ -782,8 +794,10 @@ function App() {
           </div>
           <h1>¿Recolectar en las próximas 48h?</h1>
           <p className="lede">
-            Introduce las coordenadas del huerto y te mostramos una recomendación clara basada en previsión
-            meteorológica real.
+            Sistema de apoyo a decisiones operativas de cosecha basado en riesgo meteorológico real.
+          </p>
+          <p className="hero-subcopy">
+            Diseñado para gestionar múltiples huertos con un criterio homogéneo y defendible.
           </p>
           <p className="badge">Día {trialDay} de 7 de prueba gratuita</p>
           {trialExpired && (
@@ -802,14 +816,14 @@ function App() {
                 type="text"
                 value={input}
                 onChange={e => setInput(e.target.value)}
-                placeholder="Pega aquí desde Google Maps (ej. 39.4699, -0.3763)"
+                placeholder="Introduce coordenadas del huerto."
                 autoComplete="off"
               />
               <button type="submit" disabled={loading}>
                 {loading ? 'Actualizando...' : 'Consultar'}
               </button>
             </div>
-            <p className="coords-hint">Solo la primera vez por huerto. Guárdalo y después usa 'Mis huertos'.</p>
+            <p className="coords-hint">Solo es necesario la primera vez. Guarda el huerto y decide después desde “Mis huertos”.</p>
             {error && <p className="error">{error}</p>}
           </form>
 
@@ -908,7 +922,8 @@ function App() {
           <div className="map-card">
             <div className="map-header">
               <div className="map-title">
-                <p>Mapa meteorológico</p>
+                <p>Validación visual meteorológica del huerto</p>
+                <p className="map-subtitle">Visualización directa de las condiciones meteorológicas sobre la localización real del huerto.</p>
                 <span>{coords.lat.toFixed(4)}, {coords.lon.toFixed(4)}</span>
               </div>
               <div className="map-layers">
@@ -932,11 +947,11 @@ function App() {
             ) : (
               <>
                 <div className="map-wrapper">
-                  <MapContainer center={[coords.lat, coords.lon]} zoom={11} scrollWheelZoom style={{ height: '100%', width: '100%' }}>
+                  <MapContainer center={[coords.lat, coords.lon]} zoom={8} scrollWheelZoom style={{ height: '100%', width: '100%' }}>
                     <MapController center={[coords.lat, coords.lon]} />
                     <TileLayer
                       attribution='&copy; OpenStreetMap contributors &copy; CARTO'
-                      url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+                      url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
                     />
                     {radarTimestamp && (
                       <TileLayer
@@ -993,7 +1008,7 @@ function App() {
         <div className="decision-row">
           <div className={`${cardClass} primary decision-card`}>
             <div className="status-head">
-              <p className="status-label title-lg">Decisión operativa</p>
+              <p className="status-label title-lg">Decisión operativa recomendada</p>
               {statusIcon}
             </div>
             <div className="confidence-row">
@@ -1002,6 +1017,7 @@ function App() {
               </span>
               {systemNote && <span className="confidence-note">{systemNote}</span>}
             </div>
+            <p className="decision-kicker">Recomendación del sistema para este huerto</p>
             <h2>{systemStatus === 'no-data' ? 'Datos no disponibles temporalmente' : activeDecision ? activeDecision.verdict : 'Introduce coordenadas'}</h2>
             {sealText && <p className="seal">{sealText}</p>}
             {systemStatus === 'no-data' ? (
@@ -1015,9 +1031,13 @@ function App() {
               </>
             ) : (
               <>
-                <p className="validity">Válida hasta {validityUntil}</p>
+                <p className="validity">Recomendación válida hasta: {validityUntil}</p>
                 <p className="next-window">{nextWindowText}</p>
-                <p className="status-reason">{activeDecision ? activeDecision.reason : 'Esperando ubicación válida.'}</p>
+                <p className="status-reason">
+                  {activeDecision
+                    ? 'Escenario meteorológico inestable con ventanas de secado limitadas. Se recomienda esperar y aprovechar únicamente las ventanas seguras indicadas.'
+                    : 'Esperando ubicación válida.'}
+                </p>
                 {systemStatus === 'timeout' && (
                   <p className="status-reason">Última actualización fiable: {lastUpdateText}</p>
                 )}
@@ -1047,6 +1067,7 @@ function App() {
           <div className="support-head">
             <p className="status-label title-lg">Justificación técnica</p>
           </div>
+          <p className="support-intro">La recomendación se basa en datos meteorológicos disponibles y debe confirmarse siempre con criterio operativo.</p>
           <div className="support-grid">
             <div className="info-card">
               <p className="status-label">Contexto de la consulta</p>
@@ -1130,7 +1151,7 @@ function App() {
             <div className="trace-card trace-full">
               <p className="status-label">Trazabilidad y respaldo</p>
               <button className="ghost-btn" type="button" onClick={() => setShowDetails(!showDetails)}>
-                {showDetails ? 'Ocultar detalle horario' : 'Ver detalle horario'}
+                {showDetails ? 'Ocultar detalle horario' : 'Ver respaldo horario de la decisión'}
               </button>
               {showDetails && activeDecision?.windows?.length ? (
                 <div className="dry-section">
@@ -1163,7 +1184,7 @@ function App() {
               ) : null}
 
               <button className="ghost-btn" type="button" onClick={() => setShowMetrics(!showMetrics)}>
-                {showMetrics ? 'Ocultar métricas' : 'Ver métricas (48h)'}
+                {showMetrics ? 'Ocultar métricas' : 'Ver por qué el sistema recomienda esta decisión'}
               </button>
               {showMetrics && (
                 <div className="metrics">
@@ -1196,7 +1217,7 @@ function App() {
               )}
 
               <button className="ghost-btn" type="button" onClick={() => setShowHistory(!showHistory)}>
-                {showHistory ? 'Ocultar histórico' : 'Ver histórico (últimas 3)'}
+                {showHistory ? 'Ocultar histórico' : 'Ver decisiones recientes para este huerto'}
               </button>
               {showHistory && (
                 <div className="history-card">
@@ -1299,7 +1320,8 @@ function App() {
         </div>
 
         <footer className="footer">
-          <p className="note">SaaS desarrollado por LIND Informática · Decisiones operativas basadas en datos reales.</p>
+          <p className="note">Decisiones operativas basadas en riesgo real. No en suposiciones.</p>
+          <p className="note">SaaS desarrollado por Lind Informática.</p>
           <p className="note"><a href="https://www.lindinformatica.com" title="https://www.lindinformatica.com">www.lindinformatica.com</a> · Almassora (Castelló) · +34 689 388 980</p>
           <p className="note">Tots els drets reservats· 2026</p>
         </footer>

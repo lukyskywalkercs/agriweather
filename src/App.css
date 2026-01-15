@@ -75,6 +75,12 @@
   margin-bottom: 12px;
 }
 
+.hero-subcopy {
+  font-size: 15px;
+  color: #475569;
+  margin: 0 0 12px;
+}
+
 .badge {
   display: inline-block;
   padding: 6px 10px;
@@ -281,8 +287,10 @@
 }
 
 .status.primary h2 {
-  font-size: 44px;
+  font-size: 48px;
   letter-spacing: 0.02em;
+  font-weight: 800;
+  line-height: 1.12;
 }
 
 .status-reason {
@@ -337,6 +345,15 @@
   color: #475569;
   font-size: 13px;
   font-weight: 600;
+}
+
+.decision-kicker {
+  margin: 0;
+  color: #475569;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 700;
 }
 
 .map-card {
@@ -426,8 +443,15 @@
   font-weight: 700;
 }
 
+.map-subtitle {
+  margin: 0;
+  color: #475569;
+  font-size: 13px;
+  font-weight: 500;
+}
+
 .map-wrapper {
-  height: 320px;
+  height: 360px;
 }
 
 .map-legend {
@@ -693,6 +717,12 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+}
+
+.support-intro {
+  margin: 0;
+  color: #475569;
+  font-size: 13px;
 }
 
 .support-grid {
