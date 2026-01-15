@@ -177,6 +177,10 @@ function App() {
   const [registerEmail, setRegisterEmail] = useState('')
   const [registerError, setRegisterError] = useState('')
   const [registerLoading, setRegisterLoading] = useState(false)
+  const [demoOpen, setDemoOpen] = useState(false)
+  const [demoName, setDemoName] = useState('')
+  const [demoSurname, setDemoSurname] = useState('')
+  const [demoEmail, setDemoEmail] = useState('')
   const [userId, setUserId] = useState(null)
   const [userName, setUserName] = useState('')
   const [trialStart, setTrialStart] = useState(null)
@@ -248,6 +252,16 @@ function App() {
   useEffect(() => {
     setRegisterOpen(true)
   }, [])
+
+  const handleDemoSubmit = event => {
+    event.preventDefault()
+    const body = `Solicitud de demo CitrusWindow%0D%0A%0D%0ANombre: ${demoName}%0D%0AApellidos: ${demoSurname}%0D%0ACorreo: ${demoEmail}`
+    window.location.href = `mailto:lucas@lindinformatica.com?subject=Solicitud%20demo%20CitrusWindow&body=${body}`
+    setDemoOpen(false)
+    setDemoName('')
+    setDemoSurname('')
+    setDemoEmail('')
+  }
 
   useEffect(() => {
     if (!userId) return
@@ -744,6 +758,9 @@ function App() {
             Introduce las coordenadas del huerto y te mostramos una recomendación clara basada en previsión
             meteorológica real.
           </p>
+          <button className="save-btn" type="button" onClick={() => setDemoOpen(true)}>
+            Registrar demo
+          </button>
           <p className="badge">Día {trialDay} de 7 de prueba gratuita</p>
           {trialExpired && (
             <p className="trial-warning">Prueba finalizada: el resultado principal sigue activo; funciones avanzadas limitadas.</p>
@@ -1293,6 +1310,41 @@ function App() {
               <button type="submit" className="save-btn" disabled={registerLoading}>
                 {registerLoading ? 'Guardando...' : 'Continuar'}
               </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {demoOpen && (
+        <div className="feedback-backdrop">
+          <div className="demo-card">
+            <div className="feedback-head">
+              <p className="status-label">Solicitar demo</p>
+              <button className="close-btn" onClick={() => setDemoOpen(false)}>×</button>
+            </div>
+            <form className="feedback-form" onSubmit={handleDemoSubmit}>
+              <label>Nombre</label>
+              <input
+                type="text"
+                value={demoName}
+                onChange={e => setDemoName(e.target.value)}
+                required
+              />
+              <label>Apellidos</label>
+              <input
+                type="text"
+                value={demoSurname}
+                onChange={e => setDemoSurname(e.target.value)}
+                required
+              />
+              <label>Correo electrónico</label>
+              <input
+                type="email"
+                value={demoEmail}
+                onChange={e => setDemoEmail(e.target.value)}
+                required
+              />
+              <button type="submit" className="save-btn">Enviar solicitud</button>
             </form>
           </div>
         </div>

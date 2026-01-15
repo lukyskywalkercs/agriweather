@@ -91,13 +91,6 @@ h1 {
   margin-bottom: 24px;
 }
 
-.cta-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  justify-content: center;
-}
-
 .hero-input {
   background: #ffffff;
   border: 1px solid #e2e8f0;
@@ -449,16 +442,6 @@ h3 {
   cursor: pointer;
 }
 
-.outline-button {
-  padding: 12px 20px;
-  border-radius: 999px;
-  border: 1px solid #1f4fd6;
-  background: #ffffff;
-  color: #1f4fd6;
-  font-weight: 600;
-  cursor: pointer;
-}
-
 .cta-note {
   margin: 0;
   color: #2a3c52;
@@ -602,7 +585,7 @@ h3 {
   align-items: center;
   gap: 10px;
   box-shadow: 0 12px 22px rgba(0, 0, 0, 0.2);
-  z-index: 9999;
+  z-index: 50;
 }
 
 .whatsapp-icon {
@@ -614,53 +597,6 @@ h3 {
   place-items: center;
   font-size: 0.75rem;
   font-weight: 700;
-}
-
-.modal-backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(15, 23, 42, 0.55);
-  display: none;
-  align-items: center;
-  justify-content: center;
-  padding: 16px;
-  z-index: 10000;
-}
-
-.modal-backdrop.is-open {
-  display: flex;
-}
-
-.modal-card {
-  width: min(420px, 100%);
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 14px;
-  padding: 18px;
-  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.2);
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.modal-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.modal-card form {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.modal-card input {
-  width: 100%;
-  border: 1px solid #cbd5e1;
-  border-radius: 10px;
-  padding: 10px 12px;
-  font-family: inherit;
 }
 
 .decision-widget {
@@ -759,11 +695,15 @@ h3 {
 
 .map-canvas {
   position: relative;
-  height: 300px;
+  height: 200px;
   border-radius: 12px;
   background: linear-gradient(135deg, #203049, #0f2236);
   overflow: hidden;
-  z-index: 1;
+}
+
+.map-canvas {
+  position: relative;
+  height: 300px;
 }
 
 .humidity-chart {

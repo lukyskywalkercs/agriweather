@@ -1194,6 +1194,24 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
+  text-align: center;
+  align-items: center;
+}
+
+.register-card .feedback-form {
+  width: 100%;
+}
+
+.demo-card {
+  width: min(420px, 100%);
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 18px;
+  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.2);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .feedback-head {

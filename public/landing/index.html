@@ -69,6 +69,9 @@
               <a class="primary-button" id="cta-hero" href="#">
                 Probar con mis huertos ahora
               </a>
+              <button class="outline-button" type="button" id="demo-open-hero">
+                Registrar
+              </button>
             </div>
           </div>
           <div class="hero-panel">
@@ -266,9 +269,14 @@
             CitrusWindow alinea cuadrillas, camiones y almacén con una decisión
             operativa clara por huerto.
           </p>
-          <a class="primary-button" id="cta-footer" href="#">
-            Probar con mis huertos ahora
-          </a>
+          <div class="cta-actions">
+            <a class="primary-button" id="cta-footer" href="#">
+              Probar con mis huertos ahora
+            </a>
+            <button class="outline-button" type="button" id="demo-open-footer">
+              Registrar
+            </button>
+          </div>
         </div>
       </section>
 
@@ -318,6 +326,25 @@
       <span class="whatsapp-icon">WA</span>
       ¿Dudas técnicas? Habla con un experto
     </a>
+    <div class="modal-backdrop" id="demo-modal" aria-hidden="true">
+      <div class="modal-card">
+        <div class="modal-head">
+          <h3>Solicitar demo</h3>
+          <button class="close-btn" type="button" id="demo-close">×</button>
+        </div>
+        <form id="demo-form">
+          <label>Nombre</label>
+          <input type="text" name="nombre" required />
+          <label>Apellidos</label>
+          <input type="text" name="apellidos" required />
+          <label>Correo electrónico</label>
+          <input type="email" name="email" required />
+          <button class="primary-button" type="submit">
+            Enviar solicitud
+          </button>
+        </form>
+      </div>
+    </div>
     <script
       src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
       integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
@@ -344,6 +371,11 @@
       const chartArea = document.getElementById("chart-area");
       const chartMeta = document.getElementById("chart-meta");
       const radarChip = document.getElementById("radar-chip");
+      const demoModal = document.getElementById("demo-modal");
+      const demoOpenHero = document.getElementById("demo-open-hero");
+      const demoOpenFooter = document.getElementById("demo-open-footer");
+      const demoClose = document.getElementById("demo-close");
+      const demoForm = document.getElementById("demo-form");
       let searchTimer;
       const defaultCoords = { lat: 39.5, lon: -0.4 };
 
@@ -617,6 +649,34 @@
         if (!resultsBox.contains(event.target) && event.target !== searchInput) {
           clearResults();
         }
+      });
+
+      const openDemoModal = () => {
+        demoModal.classList.add("is-open");
+        demoModal.setAttribute("aria-hidden", "false");
+      };
+
+      const closeDemoModal = () => {
+        demoModal.classList.remove("is-open");
+        demoModal.setAttribute("aria-hidden", "true");
+      };
+
+      demoOpenHero.addEventListener("click", openDemoModal);
+      demoOpenFooter.addEventListener("click", openDemoModal);
+      demoClose.addEventListener("click", closeDemoModal);
+      demoModal.addEventListener("click", (event) => {
+        if (event.target === demoModal) closeDemoModal();
+      });
+
+      demoForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const formData = new FormData(demoForm);
+        const nombre = formData.get("nombre");
+        const apellidos = formData.get("apellidos");
+        const email = formData.get("email");
+        const body = `Solicitud de demo CitrusWindow%0D%0A%0D%0ANombre: ${nombre}%0D%0AApellidos: ${apellidos}%0D%0ACorreo: ${email}`;
+        window.location.href = `mailto:lucas@lindinformatica.com?subject=Solicitud%20demo%20CitrusWindow&body=${body}`;
+        closeDemoModal();
       });
     </script>
   </body>
