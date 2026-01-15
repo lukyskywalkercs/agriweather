@@ -504,7 +504,7 @@
           mapInstance = L.map("radar-map", {
             zoomControl: false,
             attributionControl: false,
-          }).setView([lat, lon], 5);
+          }).setView([lat, lon], 10);
           L.tileLayer(
             "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
             { opacity: 0.9 }
@@ -524,7 +524,7 @@
           }
           setTimeout(() => mapInstance.invalidateSize(), 0);
         } else {
-          mapInstance.setView([lat, lon], 5);
+          mapInstance.setView([lat, lon], 10);
           marker.setLatLng([lat, lon]);
           if (radarLayer) {
             mapInstance.removeLayer(radarLayer);
