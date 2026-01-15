@@ -753,141 +753,6 @@ function App() {
       </header>
 
       <section className="panel">
-        <div className="map-section">
-          <div className="map-card">
-            <div className="map-header">
-              <div className="map-title">
-                <p>Mapa meteorológico</p>
-                <span>{coords.lat.toFixed(4)}, {coords.lon.toFixed(4)}</span>
-              </div>
-              <div className="map-layers">
-                <button className={`layer-btn ${mapLayer === 'precipitation' ? 'active' : ''}`} type="button" onClick={() => setMapLayer('precipitation')}>
-                  Precipitación
-                </button>
-                <button className={`layer-btn ${mapLayer === 'humidity' ? 'active' : ''}`} type="button" onClick={() => setMapLayer('humidity')}>
-                  Humedad
-                </button>
-                <button className={`layer-btn ${mapLayer === 'clouds' ? 'active' : ''}`} type="button" onClick={() => setMapLayer('clouds')}>
-                  Nubosidad
-                </button>
-              </div>
-            </div>
-            {systemStatus === 'no-data' ? (
-              <div className="map-empty">
-                <p className="map-error">Datos meteorológicos no disponibles</p>
-                <p className="muted">Mapa desactivado; se mantiene la última recomendación válida.</p>
-              </div>
-            ) : !activeForecast ? (
-              <div className="map-empty">
-                <p className="muted">Cargando datos meteorológicos...</p>
-              </div>
-            ) : (
-              <>
-                <div className="map-wrapper">
-                  <MapContainer center={[coords.lat, coords.lon]} zoom={11} scrollWheelZoom style={{ height: '100%', width: '100%' }}>
-                    <MapController center={[coords.lat, coords.lon]} />
-                    <TileLayer
-                      attribution='&copy; OpenStreetMap contributors'
-                      url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                    />
-                    <Circle
-                      center={[coords.lat, coords.lon]}
-                      radius={6000}
-                      pathOptions={{ color: mapLayerMeta.color, fillColor: mapLayerMeta.color, fillOpacity: 0.25 }}
-                    />
-                    <Marker position={[coords.lat, coords.lon]} icon={markerIcon}>
-                      <Popup>Huerto cítrico</Popup>
-                    </Marker>
-                  </MapContainer>
-                </div>
-                <div className="map-legend">
-                  <div>
-                    <p className="metric-label">{mapLayerMeta.label}</p>
-                    <p className="metric-value">{mapLayerValueText}</p>
-                  </div>
-                  <span className="map-legend-note">Capa 48h (Open-Meteo)</span>
-                </div>
-              </>
-            )}
-            <div className="map-compact">
-              <div>
-                <p className="metric-label">Huerto</p>
-                <p className="metric-value">{orchardName || 'Huerto sin nombre'}</p>
-              </div>
-              <div>
-                <p className="metric-label">Coordenadas</p>
-                <p className="metric-value">{coords.lat.toFixed(4)}, {coords.lon.toFixed(4)}</p>
-              </div>
-              <div>
-                <p className="metric-label">Provincia</p>
-                <p className="metric-value">{provinceName}</p>
-              </div>
-            </div>
-            <div className="map-name">
-              <MapPin size={16} />
-              <input
-                type="text"
-                value={orchardName}
-                onChange={e => setOrchardName(e.target.value)}
-                placeholder="Nombre visible del huerto"
-              />
-            </div>
-          </div>
-        </div>
-
-        <div className="decision-row">
-          <div className={`${cardClass} primary decision-card`}>
-            <div className="status-head">
-              <p className="status-label title-lg">Decisión operativa</p>
-              {statusIcon}
-            </div>
-            <div className="confidence-row">
-              <span className={`confidence-pill ${confidenceLevel === 'Alta' ? 'high' : confidenceLevel === 'Media' ? 'medium' : 'limited'}`}>
-                Confianza {confidenceLevel}
-              </span>
-              {systemNote && <span className="confidence-note">{systemNote}</span>}
-            </div>
-            <h2>{systemStatus === 'no-data' ? 'Datos no disponibles temporalmente' : activeDecision ? activeDecision.verdict : 'Introduce coordenadas'}</h2>
-            {sealText && <p className="seal">{sealText}</p>}
-            {systemStatus === 'no-data' ? (
-              <>
-                {lastValidDecision && (
-                  <p className="status-reason">
-                    Última recomendación válida: {lastValidDecision.verdict}
-                  </p>
-                )}
-                <p className="validity">Última actualización fiable: {lastValidAt ? new Date(lastValidAt).toLocaleString() : '—'}</p>
-              </>
-            ) : (
-              <>
-                <p className="validity">Válida hasta {validityUntil}</p>
-                <p className="next-window">{nextWindowText}</p>
-                <p className="status-reason">{activeDecision ? activeDecision.reason : 'Esperando ubicación válida.'}</p>
-                {systemStatus === 'timeout' && (
-                  <p className="status-reason">Última actualización fiable: {lastUpdateText}</p>
-                )}
-              </>
-            )}
-            <div className="summary">
-              <p className="summary-title">Resumen rápido</p>
-              <p className="summary-description">
-                Validez de la recomendación, riesgo principal y ventanas de secado críticas para decidir.
-              </p>
-              <div className="summary-grid">
-                <div>
-                  <p className="metric-label">Riesgo principal</p>
-                  <p className="metric-value">{primaryRisk}</p>
-                </div>
-                <div>
-                  <p className="metric-label">Ventanas (48h)</p>
-                  <p className="metric-value">{windowsCount === undefined || windowsCount === null ? '—' : windowsCount}</p>
-                </div>
-              </div>
-            </div>
-            <div className="cta-inline">Este criterio puede adaptarse a la operativa concreta de cada almacén.</div>
-          </div>
-        </div>
-
         <div className="control-row">
           <form className="coords-form" onSubmit={handleSubmit}>
             <label htmlFor="coords">Coordenadas (latitud, longitud)</label>
@@ -996,6 +861,141 @@ function App() {
                 </div>
               </div>
             )}
+          </div>
+        </div>
+
+        <div className="decision-row">
+          <div className={`${cardClass} primary decision-card`}>
+            <div className="status-head">
+              <p className="status-label title-lg">Decisión operativa</p>
+              {statusIcon}
+            </div>
+            <div className="confidence-row">
+              <span className={`confidence-pill ${confidenceLevel === 'Alta' ? 'high' : confidenceLevel === 'Media' ? 'medium' : 'limited'}`}>
+                Confianza {confidenceLevel}
+              </span>
+              {systemNote && <span className="confidence-note">{systemNote}</span>}
+            </div>
+            <h2>{systemStatus === 'no-data' ? 'Datos no disponibles temporalmente' : activeDecision ? activeDecision.verdict : 'Introduce coordenadas'}</h2>
+            {sealText && <p className="seal">{sealText}</p>}
+            {systemStatus === 'no-data' ? (
+              <>
+                {lastValidDecision && (
+                  <p className="status-reason">
+                    Última recomendación válida: {lastValidDecision.verdict}
+                  </p>
+                )}
+                <p className="validity">Última actualización fiable: {lastValidAt ? new Date(lastValidAt).toLocaleString() : '—'}</p>
+              </>
+            ) : (
+              <>
+                <p className="validity">Válida hasta {validityUntil}</p>
+                <p className="next-window">{nextWindowText}</p>
+                <p className="status-reason">{activeDecision ? activeDecision.reason : 'Esperando ubicación válida.'}</p>
+                {systemStatus === 'timeout' && (
+                  <p className="status-reason">Última actualización fiable: {lastUpdateText}</p>
+                )}
+              </>
+            )}
+            <div className="summary">
+              <p className="summary-title">Resumen rápido</p>
+              <p className="summary-description">
+                Validez de la recomendación, riesgo principal y ventanas de secado críticas para decidir.
+              </p>
+              <div className="summary-grid">
+                <div>
+                  <p className="metric-label">Riesgo principal</p>
+                  <p className="metric-value">{primaryRisk}</p>
+                </div>
+                <div>
+                  <p className="metric-label">Ventanas (48h)</p>
+                  <p className="metric-value">{windowsCount === undefined || windowsCount === null ? '—' : windowsCount}</p>
+                </div>
+              </div>
+            </div>
+            <div className="cta-inline">Este criterio puede adaptarse a la operativa concreta de cada almacén.</div>
+          </div>
+        </div>
+
+        <div className="map-section">
+          <div className="map-card">
+            <div className="map-header">
+              <div className="map-title">
+                <p>Mapa meteorológico</p>
+                <span>{coords.lat.toFixed(4)}, {coords.lon.toFixed(4)}</span>
+              </div>
+              <div className="map-layers">
+                <button className={`layer-btn ${mapLayer === 'precipitation' ? 'active' : ''}`} type="button" onClick={() => setMapLayer('precipitation')}>
+                  Precipitación
+                </button>
+                <button className={`layer-btn ${mapLayer === 'humidity' ? 'active' : ''}`} type="button" onClick={() => setMapLayer('humidity')}>
+                  Humedad
+                </button>
+                <button className={`layer-btn ${mapLayer === 'clouds' ? 'active' : ''}`} type="button" onClick={() => setMapLayer('clouds')}>
+                  Nubosidad
+                </button>
+              </div>
+            </div>
+            {systemStatus === 'no-data' ? (
+              <div className="map-empty">
+                <p className="map-error">Datos meteorológicos no disponibles</p>
+                <p className="muted">Mapa desactivado; se mantiene la última recomendación válida.</p>
+              </div>
+            ) : !activeForecast ? (
+              <div className="map-empty">
+                <p className="muted">Cargando datos meteorológicos...</p>
+              </div>
+            ) : (
+              <>
+                <div className="map-wrapper">
+                  <MapContainer center={[coords.lat, coords.lon]} zoom={11} scrollWheelZoom style={{ height: '100%', width: '100%' }}>
+                    <MapController center={[coords.lat, coords.lon]} />
+                    <TileLayer
+                      attribution='&copy; OpenStreetMap contributors'
+                      url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    />
+                    <Circle
+                      center={[coords.lat, coords.lon]}
+                      radius={6000}
+                      pathOptions={{ color: mapLayerMeta.color, fillColor: mapLayerMeta.color, fillOpacity: 0.25 }}
+                    />
+                    <Marker position={[coords.lat, coords.lon]} icon={markerIcon}>
+                      <Popup>Huerto cítrico</Popup>
+                    </Marker>
+                  </MapContainer>
+                </div>
+                <div className="map-legend">
+                  <div>
+                    <p className="metric-label">{mapLayerMeta.label}</p>
+                    <p className="metric-value">{mapLayerValueText}</p>
+                  </div>
+                  <span className="map-legend-note">Capa 48h (Open-Meteo)</span>
+                </div>
+              </>
+            )}
+            <div className="map-compact">
+              <div>
+                <p className="metric-label">Huerto</p>
+                <p className="metric-value">{orchardName || 'Huerto sin nombre'}</p>
+              </div>
+              <div>
+                <p className="metric-label">Coordenadas</p>
+                <p className="metric-value">{coords.lat.toFixed(4)}, {coords.lon.toFixed(4)}</p>
+              </div>
+              <div>
+                <p className="metric-label">Provincia</p>
+                <p className="metric-value">{provinceName}</p>
+              </div>
+            </div>
+            <div className="map-name">
+              <MapPin size={16} />
+              <input
+                type="text"
+                value={orchardName}
+                onChange={e => setOrchardName(e.target.value)}
+                placeholder="Nombre visible del huerto"
+              />
+            </div>
           </div>
         </div>
 

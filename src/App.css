@@ -137,6 +137,7 @@
 
 .map-section {
   display: flex;
+  width: 100%;
 }
 
 .left-stack {
@@ -346,6 +347,7 @@
   background: #ffffff;
   display: flex;
   flex-direction: column;
+  width: 100%;
 }
 
 .map-title {
