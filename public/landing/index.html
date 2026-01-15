@@ -41,8 +41,14 @@
             </h1>
             <p class="hero-lead">
               CitrusWindow transforma datos meteorológicos complejos en órdenes
-              de trabajo claras. Optimiza la logística de tus huertos y elimina
-              los costes de desplazamiento fallido.
+              de trabajo claras. Una ventana de secado indica el tramo horario
+              en el que la fruta ya no retiene humedad superficial y puede
+              cortarse sin riesgo de mojado. Saber cuándo se abre esa ventana
+              evita enviar cuadrillas antes de tiempo, reduce viajes fallidos y
+              asegura la carga en el momento correcto. Tener este gestor a mano
+              te permite coordinar huertos, camiones y almacén con criterios
+              objetivos, no con suposiciones. Optimiza la logística de tus
+              huertos y elimina los costes de desplazamiento fallido.
             </p>
             <p class="hero-sublead">
               Especializado en recolección de cítricos.
@@ -498,7 +504,7 @@
           mapInstance = L.map("radar-map", {
             zoomControl: false,
             attributionControl: false,
-          }).setView([lat, lon], 6);
+          }).setView([lat, lon], 5);
           L.tileLayer(
             "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
             { opacity: 0.9 }
@@ -518,7 +524,7 @@
           }
           setTimeout(() => mapInstance.invalidateSize(), 0);
         } else {
-          mapInstance.setView([lat, lon], 6);
+          mapInstance.setView([lat, lon], 5);
           marker.setLatLng([lat, lon]);
           if (radarLayer) {
             mapInstance.removeLayer(radarLayer);
