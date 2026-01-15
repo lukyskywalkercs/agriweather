@@ -203,6 +203,10 @@ function App() {
   const [showTech, setShowTech] = useState(false)
   const [radarTimestamp, setRadarTimestamp] = useState(null)
   const [radarError, setRadarError] = useState('')
+  const [adminKey, setAdminKey] = useState('')
+  const [adminData, setAdminData] = useState(null)
+  const [adminError, setAdminError] = useState('')
+  const [adminLoading, setAdminLoading] = useState(false)
 
   useEffect(() => {
     if (!userId || feedbackSeen) return
@@ -244,6 +248,18 @@ function App() {
     if (!dataTimestamp) return '—'
     return new Date(dataTimestamp).toLocaleString()
   }, [dataTimestamp])
+
+  const isAdminView = useMemo(() => {
+    if (typeof window === 'undefined') return false
+    const params = new URLSearchParams(window.location.search)
+    return params.get('admin') === '1'
+  }, [])
+
+  const adminUsers = useMemo(() => adminData?.users || [], [adminData])
+  const adminActive = useMemo(() => {
+    const dayAgo = Date.now() - 24 * 60 * 60 * 1000
+    return adminUsers.filter(user => Date.parse(user.last_activity) >= dayAgo).length
+  }, [adminUsers])
 
   useEffect(() => {
     setRegisterOpen(true)
@@ -665,6 +681,29 @@ function App() {
       setRegisterError(err.message || 'Error inesperado')
     } finally {
       setRegisterLoading(false)
+    }
+  }
+
+  const handleAdminFetch = async event => {
+    event.preventDefault()
+    setAdminError('')
+    if (!adminKey.trim()) {
+      setAdminError('Clave requerida.')
+      return
+    }
+    setAdminLoading(true)
+    try {
+      const res = await fetch('/.netlify/functions/admin-summary', {
+        headers: { 'x-admin-key': adminKey.trim() },
+      })
+      if (!res.ok) throw new Error('No autorizado o error de servidor.')
+      const payload = await res.json()
+      setAdminData(payload)
+    } catch (err) {
+      setAdminError(err.message || 'Error al cargar el panel.')
+      setAdminData(null)
+    } finally {
+      setAdminLoading(false)
     }
   }
 
@@ -1265,6 +1304,59 @@ function App() {
           <p className="note">Tots els drets reservats· 2026</p>
         </footer>
       </section>
+
+      {isAdminView && (
+        <section className="admin-panel">
+          <div className="admin-card">
+            <div className="admin-head">
+              <h3>Panel administrador</h3>
+              <span>Acceso restringido</span>
+            </div>
+            <form className="feedback-form" onSubmit={handleAdminFetch}>
+              <label>Clave admin</label>
+              <input
+                type="password"
+                value={adminKey}
+                onChange={e => setAdminKey(e.target.value)}
+                placeholder="Introduce tu clave"
+                required
+              />
+              {adminError && <p className="error">{adminError}</p>}
+              <button type="submit" className="save-btn" disabled={adminLoading}>
+                {adminLoading ? 'Cargando...' : 'Ver usuarios'}
+              </button>
+            </form>
+            {adminData && (
+              <div className="admin-summary">
+                <div>
+                  <p className="status-label">Usuarios totales</p>
+                  <p className="admin-value">{adminData.total_users}</p>
+                </div>
+                <div>
+                  <p className="status-label">Activos 24h</p>
+                  <p className="admin-value">{adminActive}</p>
+                </div>
+              </div>
+            )}
+            {adminUsers.length > 0 && (
+              <div className="admin-list">
+                {adminUsers.map(user => (
+                  <div className="admin-row" key={user.id}>
+                    <div>
+                      <p className="admin-name">{user.name}</p>
+                      <p className="admin-email">{user.email}</p>
+                    </div>
+                    <div className="admin-meta">
+                      <span>Día {user.trial_day}</span>
+                      <span>{new Date(user.last_activity).toLocaleString()}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
+      )}
 
       {registerOpen && (
         <div className="feedback-backdrop">
