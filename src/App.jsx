@@ -496,17 +496,32 @@ function App() {
   }, [radarTimestamp])
 
   const windowsCount = activeDecision?.windows?.length
-  const firstWindow = activeDecision?.windows?.[0] || null
+  const firstWindow = useMemo(() => {
+    if (!activeDecision?.windows?.length) return null
+    const now = Date.now()
+    return activeDecision.windows.find(w => Date.parse(w.end) >= now) || null
+  }, [activeDecision])
   const firstWindow24 = useMemo(() => {
     if (!activeDecision?.windows?.length) return null
     const now = Date.now()
-    return activeDecision.windows.find(w => (Date.parse(w.start) - now) / (1000 * 60 * 60) <= 24) || null
+    return (
+      activeDecision.windows.find(w => {
+        const startMs = Date.parse(w.start)
+        const endMs = Date.parse(w.end)
+        if (endMs < now) return false
+        const hours = Math.max(0, (startMs - now) / (1000 * 60 * 60))
+        return hours <= 24
+      }) || null
+    )
   }, [activeDecision])
   const firstWindow48 = useMemo(() => {
     if (!activeDecision?.windows?.length) return null
     const now = Date.now()
     return activeDecision.windows.find(w => {
-      const hours = (Date.parse(w.start) - now) / (1000 * 60 * 60)
+      const startMs = Date.parse(w.start)
+      const endMs = Date.parse(w.end)
+      if (endMs < now) return false
+      const hours = (startMs - now) / (1000 * 60 * 60)
       return hours > 24 && hours <= 48
     }) || null
   }, [activeDecision])
