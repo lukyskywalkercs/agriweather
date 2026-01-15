@@ -69,8 +69,8 @@
               <a class="primary-button" id="cta-hero" href="#">
                 Probar con mis huertos ahora
               </a>
-              <button class="outline-button" type="button" id="demo-open-hero">
-                Registrar
+              <button class="primary-button" type="button" id="demo-open-hero">
+                Pide tu usuario
               </button>
             </div>
           </div>
@@ -273,8 +273,8 @@
             <a class="primary-button" id="cta-footer" href="#">
               Probar con mis huertos ahora
             </a>
-            <button class="outline-button" type="button" id="demo-open-footer">
-              Registrar
+            <button class="primary-button" type="button" id="demo-open-footer">
+              Pide tu usuario
             </button>
           </div>
         </div>
@@ -329,10 +329,23 @@
     <div class="modal-backdrop" id="demo-modal" aria-hidden="true">
       <div class="modal-card">
         <div class="modal-head">
-          <h3>Solicitar demo</h3>
+          <h3>Pide tu usuario</h3>
           <button class="close-btn" type="button" id="demo-close">×</button>
         </div>
-        <form id="demo-form">
+        <p class="modal-note">
+          Te enviaremos usuario y contraseña a tu correo.
+        </p>
+        <form
+          id="demo-form"
+          name="demo-request"
+          method="POST"
+          data-netlify="true"
+          netlify-honeypot="bot-field"
+        >
+          <input type="hidden" name="form-name" value="demo-request" />
+          <p class="hidden-field">
+            <label>Si eres humano, deja esto vacío <input name="bot-field" /></label>
+          </p>
           <label>Nombre</label>
           <input type="text" name="nombre" required />
           <label>Apellidos</label>
@@ -343,6 +356,7 @@
             Enviar solicitud
           </button>
         </form>
+        <p class="modal-status" id="demo-status"></p>
       </div>
     </div>
     <script
@@ -376,6 +390,7 @@
       const demoOpenFooter = document.getElementById("demo-open-footer");
       const demoClose = document.getElementById("demo-close");
       const demoForm = document.getElementById("demo-form");
+      const demoStatus = document.getElementById("demo-status");
       let searchTimer;
       const defaultCoords = { lat: 39.5, lon: -0.4 };
 
@@ -668,15 +683,22 @@
         if (event.target === demoModal) closeDemoModal();
       });
 
-      demoForm.addEventListener("submit", (event) => {
+      demoForm.addEventListener("submit", async (event) => {
         event.preventDefault();
+        demoStatus.textContent = "Enviando solicitud...";
         const formData = new FormData(demoForm);
-        const nombre = formData.get("nombre");
-        const apellidos = formData.get("apellidos");
-        const email = formData.get("email");
-        const body = `Solicitud de demo CitrusWindow%0D%0A%0D%0ANombre: ${nombre}%0D%0AApellidos: ${apellidos}%0D%0ACorreo: ${email}`;
-        window.location.href = `mailto:lucas@lindinformatica.com?subject=Solicitud%20demo%20CitrusWindow&body=${body}`;
-        closeDemoModal();
+        try {
+          const response = await fetch("/", {
+            method: "POST",
+            body: formData,
+          });
+          if (!response.ok) throw new Error("network");
+          demoStatus.textContent = "Solicitud enviada. Te contactamos pronto.";
+          demoForm.reset();
+        } catch (error) {
+          demoStatus.textContent =
+            "No se pudo enviar. Inténtalo de nuevo.";
+        }
       });
     </script>
   </body>

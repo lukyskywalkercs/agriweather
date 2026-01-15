@@ -181,6 +181,7 @@ function App() {
   const [demoName, setDemoName] = useState('')
   const [demoSurname, setDemoSurname] = useState('')
   const [demoEmail, setDemoEmail] = useState('')
+  const [demoStatus, setDemoStatus] = useState('')
   const [userId, setUserId] = useState(null)
   const [userName, setUserName] = useState('')
   const [trialStart, setTrialStart] = useState(null)
@@ -255,12 +256,28 @@ function App() {
 
   const handleDemoSubmit = event => {
     event.preventDefault()
-    const body = `Solicitud de demo CitrusWindow%0D%0A%0D%0ANombre: ${demoName}%0D%0AApellidos: ${demoSurname}%0D%0ACorreo: ${demoEmail}`
-    window.location.href = `mailto:lucas@lindinformatica.com?subject=Solicitud%20demo%20CitrusWindow&body=${body}`
-    setDemoOpen(false)
-    setDemoName('')
-    setDemoSurname('')
-    setDemoEmail('')
+    setDemoStatus('Enviando solicitud...')
+    const payload = new URLSearchParams({
+      'form-name': 'demo-request',
+      nombre: demoName,
+      apellidos: demoSurname,
+      email: demoEmail,
+    })
+    fetch('/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: payload.toString(),
+    })
+      .then(res => {
+        if (!res.ok) throw new Error('network')
+        setDemoStatus('Solicitud enviada. Te contactamos pronto.')
+        setDemoName('')
+        setDemoSurname('')
+        setDemoEmail('')
+      })
+      .catch(() => {
+        setDemoStatus('No se pudo enviar. Inténtalo de nuevo.')
+      })
   }
 
   useEffect(() => {
@@ -759,7 +776,7 @@ function App() {
             meteorológica real.
           </p>
           <button className="save-btn" type="button" onClick={() => setDemoOpen(true)}>
-            Registrar demo
+            Pide tu usuario
           </button>
           <p className="badge">Día {trialDay} de 7 de prueba gratuita</p>
           {trialExpired && (
@@ -1319,9 +1336,10 @@ function App() {
         <div className="feedback-backdrop">
           <div className="demo-card">
             <div className="feedback-head">
-              <p className="status-label">Solicitar demo</p>
+              <p className="status-label">Pide tu usuario</p>
               <button className="close-btn" onClick={() => setDemoOpen(false)}>×</button>
             </div>
+            <p className="muted">Te enviaremos usuario y contraseña a tu correo.</p>
             <form className="feedback-form" onSubmit={handleDemoSubmit}>
               <label>Nombre</label>
               <input
@@ -1344,6 +1362,7 @@ function App() {
                 onChange={e => setDemoEmail(e.target.value)}
                 required
               />
+              {demoStatus && <p className="muted">{demoStatus}</p>}
               <button type="submit" className="save-btn">Enviar solicitud</button>
             </form>
           </div>

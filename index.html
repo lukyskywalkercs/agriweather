@@ -8,6 +8,15 @@
     <meta name="description" content="Sistema de predicción meteorológica y optimización de operaciones para almacenes agrícolas" />
   </head>
   <body>
+    <form name="demo-request" data-netlify="true" netlify-honeypot="bot-field" hidden>
+      <input type="hidden" name="form-name" value="demo-request" />
+      <p>
+        <label>Si eres humano, deja esto vacío <input name="bot-field" /></label>
+      </p>
+      <input type="text" name="nombre" />
+      <input type="text" name="apellidos" />
+      <input type="email" name="email" />
+    </form>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
