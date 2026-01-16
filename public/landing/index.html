@@ -333,6 +333,27 @@
       document.getElementById("cta-plan-logistica").href =
         "https://wa.me/34689388980?text=%C2%BFDudas%20t%C3%A9cnicas%3F%20Necesito%20una%20demo%20de%20CitrusWindow.";
 
+      const trackLandingVisit = () => {
+        const payload = {
+          path: window.location.pathname,
+          referrer: document.referrer || "",
+          userAgent: navigator.userAgent || "",
+        };
+        const body = JSON.stringify(payload);
+        if (navigator.sendBeacon) {
+          const blob = new Blob([body], { type: "application/json" });
+          navigator.sendBeacon("/.netlify/functions/log-landing-visit", blob);
+        } else {
+          fetch("/.netlify/functions/log-landing-visit", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body,
+            keepalive: true,
+          }).catch(() => {});
+        }
+      };
+      trackLandingVisit();
+
       const searchInput = document.getElementById("orchard-search");
       const resultsBox = document.getElementById("search-results");
       const searchNote = document.getElementById("search-note");

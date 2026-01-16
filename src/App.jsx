@@ -1430,6 +1430,28 @@ function App() {
                   <p className="status-label">Activos 24h</p>
                   <p className="admin-value">{adminActive}</p>
                 </div>
+                <div>
+                  <p className="status-label">Visitas landing</p>
+                  <p className="admin-value">{adminData.landing_visits_total ?? 0}</p>
+                </div>
+              </div>
+            )}
+            {adminData?.landing_visits_recent?.length > 0 && (
+              <div className="admin-list">
+                {adminData.landing_visits_recent.map((visit, idx) => (
+                  <div className="admin-row" key={`${visit.ip}-${visit.visited_at}-${idx}`}>
+                    <div>
+                      <p className="admin-name">{visit.ip || 'IP no disponible'}</p>
+                      <p className="admin-email">
+                        {visit.referrer ? `Referrer: ${visit.referrer}` : 'Referrer: —'}
+                      </p>
+                    </div>
+                    <div className="admin-meta">
+                      <span>{visit.path || '/'}</span>
+                      <span>{visit.visited_at ? new Date(visit.visited_at).toLocaleString() : '—'}</span>
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
             {adminUsers.length > 0 && (

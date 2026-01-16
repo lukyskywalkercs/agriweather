@@ -78,12 +78,32 @@ exports.handler = async (event) => {
       last_session_at: sessionsByUser[u.id]?.lastEndedAt || null,
     }))
 
+    let landingVisitsTotal = 0
+    let landingVisitsRecent = []
+    try {
+      const { count } = await supabase
+        .from('landing_visits')
+        .select('id', { count: 'exact', head: true })
+      landingVisitsTotal = count || 0
+
+      const { data: recent } = await supabase
+        .from('landing_visits')
+        .select('ip,visited_at,referrer,user_agent,path')
+        .order('visited_at', { ascending: false })
+        .limit(20)
+      landingVisitsRecent = recent || []
+    } catch (err) {
+      console.warn('landing_visits not available', err?.message || err)
+    }
+
     return {
       statusCode: 200,
       headers,
       body: JSON.stringify({
         total_users: enriched.length,
         users: enriched,
+        landing_visits_total: landingVisitsTotal,
+        landing_visits_recent: landingVisitsRecent,
       }),
     }
   } catch (err) {
