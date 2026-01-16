@@ -52,10 +52,30 @@ exports.handler = async (event) => {
       }
     })
 
+    const sessionsByUser = {}
+    try {
+      const { data: sessions, error: sessionsErr } = await supabase
+        .from('user_sessions')
+        .select('user_id,duration_seconds,ended_at')
+      if (sessionsErr) throw sessionsErr
+      sessions.forEach(session => {
+        const entry = sessionsByUser[session.user_id] || { totalSeconds: 0, lastEndedAt: null }
+        entry.totalSeconds += Number(session.duration_seconds || 0)
+        if (session.ended_at && (!entry.lastEndedAt || new Date(session.ended_at) > new Date(entry.lastEndedAt))) {
+          entry.lastEndedAt = session.ended_at
+        }
+        sessionsByUser[session.user_id] = entry
+      })
+    } catch (err) {
+      console.warn('user_sessions not available', err?.message || err)
+    }
+
     const enriched = users.map(u => ({
       ...u,
       trial_day: computeTrialDay(u.trial_start),
       last_activity: lastByUser[u.id] || u.last_seen || u.created_at,
+      total_session_seconds: sessionsByUser[u.id]?.totalSeconds || 0,
+      last_session_at: sessionsByUser[u.id]?.lastEndedAt || null,
     }))
 
     return {

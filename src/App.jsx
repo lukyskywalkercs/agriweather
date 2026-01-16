@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import './App.css'
 import 'leaflet/dist/leaflet.css'
 import { Circle, MapContainer, Marker, Popup, TileLayer, useMap } from 'react-leaflet'
@@ -208,6 +208,15 @@ function App() {
   const [adminError, setAdminError] = useState('')
   const [adminLoading, setAdminLoading] = useState(false)
 
+  const sessionStartRef = useRef(null)
+  const sessionIdRef = useRef(null)
+  const sessionEndedRef = useRef(false)
+  const userIdRef = useRef(null)
+
+  useEffect(() => {
+    userIdRef.current = userId
+  }, [userId])
+
   useEffect(() => {
     const storedEmail = localStorage.getItem('cw_email')
     if (storedEmail && !registerEmail) {
@@ -389,6 +398,53 @@ function App() {
     }
     fetchForecast()
   }, [coords])
+
+  const endSession = (reason = 'pagehide') => {
+    const activeUserId = userIdRef.current
+    if (!activeUserId || !sessionStartRef.current || sessionEndedRef.current) return
+    sessionEndedRef.current = true
+    const endedAt = new Date()
+    const durationSeconds = Math.max(1, Math.round((Date.now() - sessionStartRef.current) / 1000))
+    const payload = {
+      userId: activeUserId,
+      sessionId: sessionIdRef.current,
+      startedAt: new Date(sessionStartRef.current).toISOString(),
+      endedAt: endedAt.toISOString(),
+      durationSeconds,
+      reason,
+    }
+    const body = JSON.stringify(payload)
+    if (navigator.sendBeacon) {
+      const blob = new Blob([body], { type: 'application/json' })
+      navigator.sendBeacon('/.netlify/functions/log-session', blob)
+    } else {
+      fetch('/.netlify/functions/log-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body,
+        keepalive: true,
+      }).catch(() => {})
+    }
+  }
+
+  useEffect(() => {
+    if (!userId) return
+    sessionStartRef.current = Date.now()
+    sessionIdRef.current =
+      typeof crypto !== 'undefined' && crypto.randomUUID
+        ? crypto.randomUUID()
+        : `sess_${Math.random().toString(36).slice(2)}`
+    sessionEndedRef.current = false
+    const handlePageHide = () => endSession('pagehide')
+    const handleBeforeUnload = () => endSession('unload')
+    window.addEventListener('pagehide', handlePageHide)
+    window.addEventListener('beforeunload', handleBeforeUnload)
+    return () => {
+      window.removeEventListener('pagehide', handlePageHide)
+      window.removeEventListener('beforeunload', handleBeforeUnload)
+      endSession('cleanup')
+    }
+  }, [userId])
 
   useEffect(() => {
     const fetchRadar = async () => {
