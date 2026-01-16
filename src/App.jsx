@@ -1027,8 +1027,9 @@ function App() {
               {statusIcon}
             </div>
             <div className="confidence-row">
-              <span className={`confidence-pill ${confidenceLevel === 'Alta' ? 'high' : confidenceLevel === 'Media' ? 'medium' : 'limited'}`}>
-                Confianza {confidenceLevel}
+              <span className="confidence-pill">Confianza {confidenceLevel}</span>
+              <span className="confidence-explain">
+                Indica la fiabilidad del cálculo con los datos meteorológicos disponibles en ese momento. Se basa en la calidad del dataset (sin horas faltantes) y en la estabilidad de la previsión (sin saltos raros en lluvia/humedad/viento).
               </span>
               {systemNote && <span className="confidence-note">{systemNote}</span>}
             </div>

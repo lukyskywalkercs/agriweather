@@ -324,27 +324,20 @@
   font-weight: 700;
   font-size: 12px;
   text-transform: uppercase;
-}
-
-.confidence-pill.high {
-  background: #dcfce7;
-  color: #166534;
-}
-
-.confidence-pill.medium {
-  background: #fef3c7;
-  color: #92400e;
-}
-
-.confidence-pill.limited {
-  background: #fee2e2;
-  color: #991b1b;
+  background: #f1f5f9;
+  color: #0f172a;
 }
 
 .confidence-note {
   color: #475569;
   font-size: 13px;
   font-weight: 600;
+}
+
+.confidence-explain {
+  color: #475569;
+  font-size: 13px;
+  line-height: 1.5;
 }
 
 .decision-kicker {
